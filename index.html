@@ -54,7 +54,7 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div style="margin:6px 0"><button class="bt" onclick="runSS()">⏩ Steady</button><button class="bt s" onclick="runTr()">▶ Trans</button><button class="bt s" onclick="stopS()">⏹</button></div>
 
 <div class="st">Diurnal Sap Flow</div>
-<div class="pr"><span class="pl">Peak v_sap</span><span class="pv" id="v_pk">40 cm/h</span></div><input type=range id=pkV min=5 max=150 value=40 step=1>
+<div class="pr"><span class="pl">Peak v_sap</span><span class="pv" id="v_pk">20 cm/h</span></div><input type=range id=pkV min=5 max=150 value=20 step=1>
 <div class="pr"><span class="pl">Peak hour</span><span class="pv" id="v_ph">13:00</span></div><input type=range id=pkH min=10 max=16 value=13 step=.5>
 <div class="pr"><span class="pl">Night min v_sap</span><span class="pv" id="v_nm">0.5 cm/h</span></div><input type=range id=nM min=-10 max=10 value=0.5 step=.1>
 <div class="pr"><span class="pl">Noise</span><span class="pv" id="v_nl">0.03</span></div><input type=range id=nL min=0 max=.15 value=.03 step=.01>
@@ -128,7 +128,7 @@ function gP(){
   const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
   const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
   const zax=+$('zax').value,ztg=+$('ztg').value;
-  const Gb=rd/RW,u=tw*RW/rd,k=Gb*(.2+.4*u)+.024,rc=rd*CDr+RW*CW*tw;
+  const Gb=rd/RW,u=tw*RW/rd,k=.10+.20*Gb+.60*tw,rc=rd*CDr+RW*CW*tw;
   const Db=k/rc,Dtg=Db,Dax=Db*an;
   const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
   const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
@@ -251,10 +251,7 @@ function drawKD(ci){
   if(!tsH.length)return;
   let ymn=0,ymx=0;
   const rats=tsH.map(t=>t.ratio).sort((a,b)=>a-b);
-  const q1=rats[Math.floor(rats.length*.25)]||0,q3=rats[Math.ceil(rats.length*.75)-1]||0;
-  const iqr=q3-q1||.1;
-  let xmn=Math.min(q1-1.5*iqr,rats[0]>-1?rats[0]:q1-1.5*iqr);
-  let xmx=Math.max(q3+1.5*iqr,rats[rats.length-1]<2?rats[rats.length-1]:q3+1.5*iqr);
+  let xmn=rats[0],xmx=rats[rats.length-1];
   xmn=Math.min(xmn,-.2);xmx=Math.max(xmx,.5);
   const xpad=(xmx-xmn)*.05;xmn-=xpad;xmx+=xpad;
   for(const t of tsH){for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
