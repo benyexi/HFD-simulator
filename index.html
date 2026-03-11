@@ -5,30 +5,30 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap');
 :root{--bg:#0a0e17;--pnl:#111827;--brd:#1e293b;--txt:#e2e8f0;--dim:#64748b;--acc:#f59e0b}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden}
-.hd{padding:10px 20px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:16px}
-.hd h1{font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;color:var(--acc)}
-.hd .sub{font-size:10px;color:var(--dim)}
-.main{display:grid;grid-template-columns:270px 1fr 420px;height:calc(100vh - 46px)}
-.pnl{padding:10px 11px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);min-height:100vh}
+.hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px}
+.hd h1{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:var(--acc)}
+.hd .sub{font-size:12px;color:var(--dim)}
+.main{display:grid;grid-template-columns:320px 1fr 480px;min-height:calc(100vh - 54px)}
+.pnl{padding:14px 16px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
 .pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}
-.st{font-size:8px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid rgba(245,158,11,0.1)}.st:first-child{margin-top:0}
-.pr{display:flex;justify-content:space-between;align-items:center;margin:2px 0}
-.pl{font-size:10px;color:var(--dim)}.pv{font-size:10px;color:var(--txt);min-width:58px;text-align:right}
-input[type=range]{width:100%;height:3px;-webkit-appearance:none;background:var(--brd);border-radius:2px;outline:none;margin:1px 0 5px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--acc);border-radius:50%;cursor:pointer}
-select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);padding:3px 5px;font-size:9px;font-family:inherit;border-radius:3px;width:100%;margin:2px 0 4px}
-.bt{background:var(--acc);color:var(--bg);border:none;padding:5px 12px;font-size:10px;font-family:inherit;font-weight:600;border-radius:3px;cursor:pointer;margin:2px 1px}
+.st{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
+.pr{display:flex;justify-content:space-between;align-items:center;margin:3px 0}
+.pl{font-size:12px;color:var(--dim)}.pv{font-size:12px;color:var(--txt);min-width:70px;text-align:right}
+input[type=range]{width:100%;height:5px;-webkit-appearance:none;background:var(--brd);border-radius:3px;outline:none;margin:2px 0 8px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--acc);border-radius:50%;cursor:pointer}
+select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);padding:5px 8px;font-size:12px;font-family:inherit;border-radius:4px;width:100%;margin:3px 0 6px}
+.bt{background:var(--acc);color:var(--bg);border:none;padding:7px 16px;font-size:12px;font-family:inherit;font-weight:600;border-radius:4px;cursor:pointer;margin:3px 2px}
 .bt:hover{opacity:.85}.bt.s{background:var(--brd);color:var(--txt)}.bt.g{background:#22c55e;color:var(--bg)}
-.nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:3px;padding:4px 7px;margin:4px 0;font-size:9px;line-height:1.3;color:var(--dim)}.nf code{color:var(--acc)}
-.cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative}
-.rd{background:var(--pnl);border:1px solid var(--brd);border-radius:3px;padding:3px 7px;margin:2px 0}
-.rt{font-size:7px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:1px}
-.rv{font-size:13px;font-weight:600;color:var(--acc)}.ru{font-size:8px;color:var(--dim);margin-left:2px}
-.lb{display:flex;flex-direction:column;gap:2px;margin:3px 0;padding:5px 7px;background:var(--pnl);border:1px solid var(--brd);border-radius:3px}
-.li{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--dim)}
-.ld{width:9px;height:9px;border-radius:50%;border:1.5px solid #fff;flex-shrink:0}
-.sts{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:2px 7px;border-radius:3px;font-size:8px;color:var(--dim)}
+.nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:4px;padding:6px 10px;margin:6px 0;font-size:11px;line-height:1.4;color:var(--dim)}.nf code{color:var(--acc)}
+.cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative;padding:16px 0}
+.rd{background:var(--pnl);border:1px solid var(--brd);border-radius:4px;padding:5px 10px;margin:3px 0}
+.rt{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:2px}
+.rv{font-size:16px;font-weight:600;color:var(--acc)}.ru{font-size:10px;color:var(--dim);margin-left:3px}
+.lb{display:flex;flex-direction:column;gap:4px;margin:5px 0;padding:8px 10px;background:var(--pnl);border:1px solid var(--brd);border-radius:4px}
+.li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim)}
+.ld{width:12px;height:12px;border-radius:50%;border:2px solid #fff;flex-shrink:0}
+.sts{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:4px 10px;border-radius:4px;font-size:11px;color:var(--dim)}
 </style></head><body>
 <div class="hd"><h1>HFD Heat Field Simulator</h1><span class="sub">Nadezhdina 4-needle HFD · 2D FD solver · K-diagram · Diurnal</span></div>
 <div class="main">
@@ -60,19 +60,19 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="pr"><span class="pl">Noise</span><span class="pv" id="v_nl">0.03</span></div><input type=range id=nL min=0 max=.15 value=.03 step=.01>
 <select id=dTp><option value=sunny>Sunny</option><option value=cloudy>Cloudy (midday dip)</option><option value=drought>Drought (early shutdown)</option></select>
 <div><button class="bt" onclick="genD()">Generate</button><button class="bt g" onclick="playD()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
-<canvas id=dC width=248 height=65 style="border:1px solid var(--brd);border-radius:3px;margin-top:3px;width:100%"></canvas>
-<div class="nf" id="dI" style="font-size:8px">Generate → Play</div>
+<canvas id=dC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%"></canvas>
+<div class="nf" id="dI">Generate → Play</div>
 </div>
 
 <!-- CENTER -->
 <div class="cv">
-<div style="display:flex;align-items:flex-start;gap:6px">
-<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;color:var(--dim);display:flex;align-items:center;height:540px">↑ axial (stem upward, sap flow) mm</div>
-<div><canvas id=hC width=540 height=540 style="border:1px solid var(--brd)"></canvas>
-<div style="text-align:center;font-size:9px;color:var(--dim);margin-top:2px">← tangential (mm) →</div></div>
-<div style="display:flex;align-items:stretch;gap:3px">
-<canvas id=cbar width=18 height=240 style="border:1px solid var(--brd)"></canvas>
-<div style="display:flex;flex-direction:column;justify-content:space-between;height:240px;font-size:8px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:7px">°C</span><span id=cbMn>0</span></div>
+<div style="display:flex;align-items:flex-start;gap:8px">
+<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:12px;color:var(--dim);display:flex;align-items:center;height:680px">↑ axial (stem upward, sap flow) mm</div>
+<div><canvas id=hC width=680 height=680 style="border:1px solid var(--brd)"></canvas>
+<div style="text-align:center;font-size:12px;color:var(--dim);margin-top:4px">← tangential (mm) →</div></div>
+<div style="display:flex;align-items:stretch;gap:4px">
+<canvas id=cbar width=22 height=300 style="border:1px solid var(--brd)"></canvas>
+<div style="display:flex;flex-direction:column;justify-content:space-between;height:300px;font-size:10px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:9px">°C</span><span id=cbMn>0</span></div>
 </div></div>
 <div class="sts" id=sB>Ready</div>
 </div>
@@ -86,7 +86,7 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="li"><div class="ld" style="background:#a855f7"></div><b style="color:#a855f7">T2</b> Lower axial (ref, −Z_ax)</div>
 <div class="li"><div class="ld" style="background:#f59e0b"></div><b style="color:#f59e0b">T3</b> Tangential (+Z_tg)</div>
 </div>
-<div class="nf" style="font-size:8px"><b>dTsym=T1−T2</b> · <b>dTas=T3−T2</b> · <b>dTs-a=T1−T3</b></div>
+<div class="nf"><b>dTsym=T1−T2</b> · <b>dTas=T3−T2</b> · <b>dTs-a=T1−T3</b></div>
 <div class="st">Properties & Indices</div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px">
 <div class="rd"><div class="rt">k</div><div class="rv" id="o_k">—</div></div>
@@ -107,12 +107,12 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 
 <div class="st">K-Diagram (Nadezhdina 2018)</div>
-<canvas id=kC width=396 height=280 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<canvas id=kC width=448 height=320 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
 <div class="st">Time Series (24h)</div>
-<canvas id=tC width=396 height=120 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
-<div style="display:flex;gap:8px;justify-content:center;margin:2px 0;font-size:8px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
+<canvas id=tC width=448 height=160 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<div style="display:flex;gap:12px;justify-content:center;margin:4px 0;font-size:11px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
 <div class="st">Cursor</div>
-<div class="rd"><div class="rv" id="o_m" style="font-size:9px">Hover heat field</div></div>
+<div class="rd"><div class="rv" id="o_m" style="font-size:12px">Hover heat field</div></div>
 </div>
 </div>
 
@@ -210,7 +210,7 @@ function drawDC(ci){
   cx.beginPath();cx.strokeStyle='#f59e0b';cx.lineWidth=1.5;
   for(let i=0;i<dData.length;i++){const px=(dData[i].h/24)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
   if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/24)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
-  cx.fillStyle='rgba(255,255,255,.3)';cx.font='7px JetBrains Mono';
+  cx.fillStyle='rgba(255,255,255,.3)';cx.font='9px JetBrains Mono';
   for(let hr=0;hr<=24;hr+=6)cx.fillText(hr+'h',(hr/24)*w+2,h-1);
 }
 
@@ -251,7 +251,7 @@ function drawKD(ci){
     for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
   xmn=Math.min(xmn,-.05);xmx=Math.max(xmx,.1);
   const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;xmx+=.02;
-  const ml=44,mr=10,mt=12,mb=28,pw=w-ml-mr,ph=h-mt-mb;
+  const ml=48,mr=12,mt=14,mb=32,pw=w-ml-mr,ph=h-mt-mb;
   const toX=v=>ml+(v-xmn)/(xmx-xmn)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
   cx.strokeStyle='#eee';cx.lineWidth=.5;const ys=nS(yr);
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys){cx.beginPath();cx.moveTo(ml,toY(yv));cx.lineTo(ml+pw,toY(yv));cx.stroke()}
@@ -268,23 +268,23 @@ function drawKD(ci){
   // K line
   if(Kval!==null){cx.strokeStyle='rgba(200,0,0,0.55)';cx.lineWidth=1.2;cx.setLineDash([5,3]);
     cx.beginPath();cx.moveTo(ml,toY(Kval));cx.lineTo(ml+pw,toY(Kval));cx.stroke();cx.setLineDash([]);
-    cx.fillStyle='#c00';cx.font='bold 9px JetBrains Mono';cx.textAlign='left';cx.fillText('K='+Kval.toFixed(2)+'°C',ml+3,toY(Kval)-4)}
+    cx.fillStyle='#c00';cx.font='bold 11px JetBrains Mono';cx.textAlign='left';cx.fillText('K='+Kval.toFixed(2)+'°C',ml+3,toY(Kval)-5)}
   // axes
   cx.strokeStyle='#333';cx.lineWidth=1;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
-  cx.fillStyle='#333';cx.font='9px JetBrains Mono';
-  cx.save();cx.translate(11,mt+ph/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('Temperature (°C)',0,0);cx.restore();
+  cx.fillStyle='#333';cx.font='11px JetBrains Mono';
+  cx.save();cx.translate(13,mt+ph/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('Temperature (°C)',0,0);cx.restore();
   cx.textAlign='center';cx.fillText('Ratio dTsym/dTas',ml+pw/2,h-4);
-  cx.font='7px JetBrains Mono';cx.fillStyle='#666';cx.textAlign='right';
+  cx.font='9px JetBrains Mono';cx.fillStyle='#666';cx.textAlign='right';
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys)cx.fillText(yv.toFixed(1),ml-3,toY(yv)+3);
   cx.textAlign='center';const xs=nS(xmx-xmn);
-  for(let xv=Math.ceil(xmn/xs)*xs;xv<=xmx;xv+=xs)cx.fillText(xv.toFixed(1),toX(xv),mt+ph+12);
+  for(let xv=Math.ceil(xmn/xs)*xs;xv<=xmx;xv+=xs)cx.fillText(xv.toFixed(1),toX(xv),mt+ph+14);
   // LEGEND
-  const lx=ml+pw-120,ly=mt+4,lw=115,lh=62;
+  const lx=ml+pw-135,ly=mt+6,lw=130,lh=74;
   cx.fillStyle='rgba(255,255,255,0.93)';cx.strokeStyle='#ccc';cx.lineWidth=.7;
   cx.fillRect(lx,ly,lw,lh);cx.strokeRect(lx,ly,lw,lh);
   const items=[['#222','dTsym'],['#e91e90','dTas'],['#aaa','dTs-a'],['#5a8a20','K+dTs-a']];
-  cx.font='8px JetBrains Mono';
-  items.forEach(([col,label],i)=>{const iy=ly+10+i*13;cx.fillStyle=col;cx.beginPath();cx.arc(lx+9,iy,3.5,0,Math.PI*2);cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText(label,lx+18,iy+3)});
+  cx.font='10px JetBrains Mono';
+  items.forEach(([col,label],i)=>{const iy=ly+13+i*15;cx.fillStyle=col;cx.beginPath();cx.arc(lx+10,iy,4,0,Math.PI*2);cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText(label,lx+20,iy+4)});
 }
 function nS(r){const l=Math.floor(Math.log10(r));const p=Math.pow(10,l);if(r/p<2)return p*.2;if(r/p<5)return p*.5;return p}
 
@@ -309,10 +309,10 @@ function drawTS(){
   const dl=(k,col)=>{cx.beginPath();cx.strokeStyle=col;cx.lineWidth=1.2;for(let i=0;i<tsH.length;i++){const y=toY(tsH[i][k]);i?cx.lineTo(toX(i),y):cx.moveTo(toX(i),y)}cx.stroke()};
   dl('ds','#222');dl('da','#e91e90');dl('dsa','#999');
   cx.strokeStyle='#333';cx.lineWidth=.8;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
-  cx.fillStyle='#666';cx.font='7px JetBrains Mono';cx.textAlign='center';
+  cx.fillStyle='#666';cx.font='9px JetBrains Mono';cx.textAlign='center';
   for(let hr=0;hr<=24;hr+=4)cx.fillText(hr+'h',ml+(hr/24)*pw,h-2);
-  cx.textAlign='right';cx.fillText(ymx.toFixed(1),ml-2,mt+7);cx.fillText(ymn.toFixed(1),ml-2,mt+ph);
-  cx.fillStyle='#2a2';cx.textAlign='left';cx.fillText(Math.round(vmx)+'cm/h',ml+pw+2,mt+7);
+  cx.textAlign='right';cx.fillText(ymx.toFixed(1),ml-2,mt+9);cx.fillText(ymn.toFixed(1),ml-2,mt+ph);
+  cx.fillStyle='#2a2';cx.textAlign='left';cx.fillText(Math.round(vmx)+'cm/h',ml+pw+2,mt+9);
 }
 
 // ============ HEAT FIELD RENDER (jet colormap) ============
@@ -349,13 +349,13 @@ function render(p){
   for(const k of['H','T1','T2','T3']){const pp=pr[k],sx=pp.x*cW+cW/2,sy=(NY-1-pp.y)*cH+cH/2;
     hctx.beginPath();hctx.arc(sx,sy,7,0,Math.PI*2);hctx.fillStyle=k==='H'?'#ff0000':'#000';hctx.fill();
     hctx.strokeStyle='#fff';hctx.lineWidth=2;hctx.stroke();
-    hctx.fillStyle='#fff';hctx.font='bold 9px JetBrains Mono';hctx.fillText(pp.l,sx+10,sy+4)}
+    hctx.fillStyle='#fff';hctx.font='bold 12px JetBrains Mono';hctx.fillText(pp.l,sx+12,sy+5)}
   if(Math.abs(p.vcmh)>0.1){hctx.save();hctx.strokeStyle='#fff';hctx.lineWidth=2.5;hctx.fillStyle='#fff';
     const dir=p.vcmh>0?-1:1;
     hctx.beginPath();hctx.moveTo(30,45+dir*20);hctx.lineTo(30,45-dir*15);hctx.stroke();
     hctx.beginPath();hctx.moveTo(30,45-dir*15);hctx.lineTo(24,45-dir*5);hctx.moveTo(30,45-dir*15);hctx.lineTo(36,45-dir*5);hctx.stroke();
-    hctx.font='10px JetBrains Mono';hctx.fillText((p.vcmh>0?'↑':'↓')+' '+Math.abs(p.vcmh)+' cm/h',6,75);hctx.restore()}
-  for(let py=0;py<240;py++){const t=1-py/240;const[r,g,b]=jet(t);cbctx.fillStyle=`rgb(${r},${g},${b})`;cbctx.fillRect(0,py,18,1)}
+    hctx.font='13px JetBrains Mono';hctx.fillText((p.vcmh>0?'↑':'↓')+' '+Math.abs(p.vcmh)+' cm/h',6,80);hctx.restore()}
+  for(let py=0;py<300;py++){const t=1-py/300;const[r,g,b]=jet(t);cbctx.fillStyle=`rgb(${r},${g},${b})`;cbctx.fillRect(0,py,22,1)}
   $('cbMx').textContent='+'+md.toFixed(1)+'°C';$('cbMn').textContent='0';
   updR(p);
 }
