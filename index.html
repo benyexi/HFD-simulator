@@ -68,7 +68,7 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <input type=file id=upFile accept=".csv,.txt" style="display:none">
 <div><button class="bt" onclick="$('upFile').click()">Upload CSV</button><button class="bt g" onclick="playUp()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
 <canvas id=uC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%;display:none"></canvas>
-<div class="nf" id="uI">CSV: one v_sap (cm/h) per line, 10-min step.<br>Min 1 day (144 pts), max 100 days.</div>
+<div class="nf" id="uI">CSV: col1=time, col2=v_sap (cm/h)<br>Time: <code>2024-01-15 08:30</code> or <code>08:30</code><br>Min 144 rows (1 day), max 14400.</div>
 </div>
 
 <!-- CENTER -->
@@ -459,21 +459,39 @@ function runTr(){stopS();stopD();isR=true;P=gP();G=new Float64Array(NX*NY);G.fil
 function runSS(){stopS();stopD();P=gP();$('sB').textContent='Computing...';setTimeout(()=>{solveSS(P);render(P);$('sB').textContent='Steady state'},15)}
 
 // ============ UPLOAD SAP FLOW DATA ============
+function parseTS(s){
+  // Full datetime: "2024-01-15 08:30:00", "2024/01/15 08:30"
+  let d=new Date(s.replace(' ','T'));if(!isNaN(d.getTime()))return d.getTime();
+  // With slash: "01/15/2024 08:30"
+  d=new Date(s);if(!isNaN(d.getTime()))return d.getTime();
+  // Time only: "08:30" or "08:30:00"
+  const m=s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if(m)return(+m[1])*3600000+(+m[2])*60000+(m[3]?+m[3]*1000:0);
+  return null;
+}
 $('upFile').addEventListener('change',function(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=function(ev){
     const lines=ev.target.result.trim().split(/\r?\n/);
-    let si=0;const fp=lines[0].split(/[,\t; ]+/);
-    if(isNaN(parseFloat(fp[fp.length>1?1:0])))si=1;
-    const vals=[];
+    let si=0;if(/[a-zA-Z]/.test(lines[0].split(/[,\t;]+/)[0]))si=1;
+    const rows=[];let timeOnly=false;
     for(let i=si;i<lines.length;i++){const ln=lines[i].trim();if(!ln)continue;
-      const ps=ln.split(/[,\t; ]+/);const v=parseFloat(ps[ps.length>1?1:0]);if(!isNaN(v))vals.push(v)}
-    if(vals.length<144){$('uI').textContent='Error: need >= 144 points (1 day)';return}
-    if(vals.length>14400)vals.length=14400;
-    upData=vals.map((v,i)=>({h:i*10/60,v}));
-    const nD=(vals.length/144).toFixed(1);
-    $('uI').textContent=file.name+': '+vals.length+' pts ('+nD+' days)';
+      // Split on comma or tab or semicolon, but keep datetime together
+      const sep=ln.indexOf('\t')>=0?'\t':ln.indexOf(';')>=0?';':',';
+      const ps=ln.split(sep);if(ps.length<2)continue;
+      const ts=ps[0].trim(),v=parseFloat(ps[1]);if(isNaN(v))continue;
+      const ms=parseTS(ts);if(ms===null)continue;
+      if(/^\d{1,2}:\d{2}/.test(ts)&&!/\d{4}/.test(ts))timeOnly=true;
+      rows.push({ms,v});}
+    if(rows.length<144){$('uI').textContent='Error: need >= 144 rows (time, velocity)';return}
+    if(rows.length>14400)rows.length=14400;
+    const t0=rows[0].ms;
+    upData=rows.map(r=>({h:(r.ms-t0)/3600000,v:r.v}));
+    // For time-only data, fix midnight wraps
+    if(timeOnly)for(let i=1;i<upData.length;i++)while(upData[i].h<upData[i-1].h)upData[i].h+=24;
+    const nD=(upData[upData.length-1].h/24).toFixed(1);
+    $('uI').textContent=file.name+': '+rows.length+' pts ('+nD+' days)';
     $('uC').style.display='block';drawUC(-1);
   };reader.readAsText(file);e.target.value='';
 });
