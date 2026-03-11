@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HFD Heat Field Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap');
+:root{--bg:#0a0e17;--pnl:#111827;--brd:#1e293b;--txt:#e2e8f0;--dim:#64748b;--acc:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden}
+.hd{padding:10px 20px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:16px}
+.hd h1{font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;color:var(--acc)}
+.hd .sub{font-size:10px;color:var(--dim)}
+.main{display:grid;grid-template-columns:270px 1fr 420px;height:calc(100vh - 46px)}
+.pnl{padding:10px 11px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
+.pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}
+.st{font-size:8px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid rgba(245,158,11,0.1)}.st:first-child{margin-top:0}
+.pr{display:flex;justify-content:space-between;align-items:center;margin:2px 0}
+.pl{font-size:10px;color:var(--dim)}.pv{font-size:10px;color:var(--txt);min-width:58px;text-align:right}
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;background:var(--brd);border-radius:2px;outline:none;margin:1px 0 5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--acc);border-radius:50%;cursor:pointer}
+select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);padding:3px 5px;font-size:9px;font-family:inherit;border-radius:3px;width:100%;margin:2px 0 4px}
+.bt{background:var(--acc);color:var(--bg);border:none;padding:5px 12px;font-size:10px;font-family:inherit;font-weight:600;border-radius:3px;cursor:pointer;margin:2px 1px}
+.bt:hover{opacity:.85}.bt.s{background:var(--brd);color:var(--txt)}.bt.g{background:#22c55e;color:var(--bg)}
+.nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:3px;padding:4px 7px;margin:4px 0;font-size:9px;line-height:1.3;color:var(--dim)}.nf code{color:var(--acc)}
+.cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative}
+.rd{background:var(--pnl);border:1px solid var(--brd);border-radius:3px;padding:3px 7px;margin:2px 0}
+.rt{font-size:7px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:1px}
+.rv{font-size:13px;font-weight:600;color:var(--acc)}.ru{font-size:8px;color:var(--dim);margin-left:2px}
+.lb{display:flex;flex-direction:column;gap:2px;margin:3px 0;padding:5px 7px;background:var(--pnl);border:1px solid var(--brd);border-radius:3px}
+.li{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--dim)}
+.ld{width:9px;height:9px;border-radius:50%;border:1.5px solid #fff;flex-shrink:0}
+.sts{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:2px 7px;border-radius:3px;font-size:8px;color:var(--dim)}
+</style></head><body>
+<div class="hd"><h1>HFD Heat Field Simulator</h1><span class="sub">Nadezhdina 4-needle HFD · 2D FD solver · K-diagram · Diurnal</span></div>
+<div class="main">
+<!-- LEFT -->
+<div class="pnl">
+<div class="st">Probe Geometry</div>
+<div class="pr"><span class="pl">Z_ax</span><span class="pv" id="v_zax">15 mm</span></div><input type=range id=zax min=5 max=30 value=15 step=1>
+<div class="pr"><span class="pl">Z_tg</span><span class="pv" id="v_ztg">5 mm</span></div><input type=range id=ztg min=2 max=15 value=5 step=1>
+<div class="st">Heating (~50mA continuous)</div>
+<div class="pr"><span class="pl">Current I</span><span class="pv" id="v_I">50 mA</span></div><input type=range id=hI min=20 max=150 value=50 step=1>
+<div class="pr"><span class="pl">Resistance R</span><span class="pv" id="v_R">120 Ω</span></div><input type=range id=hR min=40 max=300 value=120 step=5>
+<div class="pr"><span class="pl">Needle L</span><span class="pv" id="v_L">100 mm</span></div><input type=range id=hL min=20 max=120 value=100 step=5>
+<div class="nf"><code id="pwD">P=0.300W q=3.00W/m</code></div>
+<div class="st">Sapwood</div>
+<div class="pr"><span class="pl">θ_w</span><span class="pv" id="v_tw">0.40</span></div><input type=range id=tw min=.10 max=.80 value=.40 step=.01>
+<div class="pr"><span class="pl">ρ_dry</span><span class="pv" id="v_rd">500 kg/m³</span></div><input type=range id=rd min=200 max=900 value=500 step=10>
+<div class="pr"><span class="pl">D_ax/D_tg</span><span class="pv" id="v_an">2.0</span></div><input type=range id=an min=1.0 max=4.0 value=2.0 step=.1>
+<div class="st">Manual Sap Velocity</div>
+<div class="pr"><span class="pl">v_sap ↑</span><span class="pv" id="v_vs">0 cm/h</span></div><input type=range id=vs min=-20 max=150 value=0 step=1>
+<div class="st">Environment</div>
+<div class="pr"><span class="pl">T_ambient</span><span class="pv" id="v_ta">20.0 °C</span></div><input type=range id=ta min=0 max=40 value=20 step=.5>
+<div class="pr"><span class="pl">Grid Δ</span><span class="pv" id="v_dx">0.50 mm</span></div><input type=range id=dx min=.3 max=1.0 value=.5 step=.05>
+<div style="margin:6px 0"><button class="bt" onclick="runSS()">⏩ Steady</button><button class="bt s" onclick="runTr()">▶ Trans</button><button class="bt s" onclick="stopS()">⏹</button></div>
+
+<div class="st">Diurnal Sap Flow</div>
+<div class="pr"><span class="pl">Peak v_sap</span><span class="pv" id="v_pk">40 cm/h</span></div><input type=range id=pkV min=5 max=150 value=40 step=1>
+<div class="pr"><span class="pl">Peak hour</span><span class="pv" id="v_ph">13:00</span></div><input type=range id=pkH min=10 max=16 value=13 step=.5>
+<div class="pr"><span class="pl">Night min v_sap</span><span class="pv" id="v_nm">0.5 cm/h</span></div><input type=range id=nM min=-10 max=10 value=0.5 step=.1>
+<div class="pr"><span class="pl">Noise</span><span class="pv" id="v_nl">0.03</span></div><input type=range id=nL min=0 max=.15 value=.03 step=.01>
+<select id=dTp><option value=sunny>Sunny</option><option value=cloudy>Cloudy (midday dip)</option><option value=drought>Drought (early shutdown)</option></select>
+<div><button class="bt" onclick="genD()">Generate</button><button class="bt g" onclick="playD()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
+<canvas id=dC width=248 height=65 style="border:1px solid var(--brd);border-radius:3px;margin-top:3px;width:100%"></canvas>
+<div class="nf" id="dI" style="font-size:8px">Generate → Play</div>
+</div>
+
+<!-- CENTER -->
+<div class="cv">
+<div style="display:flex;align-items:flex-start;gap:6px">
+<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;color:var(--dim);display:flex;align-items:center;height:540px">↑ axial (stem upward, sap flow) mm</div>
+<div><canvas id=hC width=540 height=540 style="border:1px solid var(--brd)"></canvas>
+<div style="text-align:center;font-size:9px;color:var(--dim);margin-top:2px">← tangential (mm) →</div></div>
+<div style="display:flex;align-items:stretch;gap:3px">
+<canvas id=cbar width=18 height=240 style="border:1px solid var(--brd)"></canvas>
+<div style="display:flex;flex-direction:column;justify-content:space-between;height:240px;font-size:8px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:7px">°C</span><span id=cbMn>0</span></div>
+</div></div>
+<div class="sts" id=sB>Ready</div>
+</div>
+
+<!-- RIGHT -->
+<div class="pnl">
+<div class="st">Probe Layout (Nadezhdina HFD)</div>
+<div class="lb">
+<div class="li"><div class="ld" style="background:#ef4444"></div><b style="color:#ef4444">H</b> Heater</div>
+<div class="li"><div class="ld" style="background:#3b82f6"></div><b style="color:#3b82f6">T1</b> Upper axial (downstream, +Z_ax)</div>
+<div class="li"><div class="ld" style="background:#a855f7"></div><b style="color:#a855f7">T2</b> Lower axial (ref, −Z_ax)</div>
+<div class="li"><div class="ld" style="background:#f59e0b"></div><b style="color:#f59e0b">T3</b> Tangential (+Z_tg)</div>
+</div>
+<div class="nf" style="font-size:8px"><b>dTsym=T1−T2</b> · <b>dTas=T3−T2</b> · <b>dTs-a=T1−T3</b></div>
+<div class="st">Properties & Indices</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px">
+<div class="rd"><div class="rt">k</div><div class="rv" id="o_k">—</div></div>
+<div class="rd"><div class="rt">ρc</div><div class="rv" id="o_rc">—</div></div>
+<div class="rd"><div class="rt">v_th</div><div class="rv" id="o_vt">—</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px">
+<div class="rd"><div class="rt">T_H</div><div class="rv" id="o_Th">—</div></div>
+<div class="rd"><div class="rt">T1</div><div class="rv" id="o_T1">—</div></div>
+<div class="rd"><div class="rt">T2</div><div class="rv" id="o_T2">—</div></div>
+<div class="rd"><div class="rt">T3</div><div class="rv" id="o_T3">—</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px">
+<div class="rd"><div class="rt">dTsym</div><div class="rv" id="o_ds">—</div></div>
+<div class="rd"><div class="rt">dTas</div><div class="rv" id="o_da">—</div></div>
+<div class="rd"><div class="rt">dTs-a</div><div class="rv" id="o_dsa">—</div></div>
+<div class="rd"><div class="rt">K</div><div class="rv" id="o_K">—</div></div>
+</div>
+
+<div class="st">K-Diagram (Nadezhdina 2018)</div>
+<canvas id=kC width=396 height=280 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<div class="st">Time Series (24h)</div>
+<canvas id=tC width=396 height=120 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<div style="display:flex;gap:8px;justify-content:center;margin:2px 0;font-size:8px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
+<div class="st">Cursor</div>
+<div class="rd"><div class="rv" id="o_m" style="font-size:9px">Hover heat field</div></div>
+</div>
+</div>
+
+<script>
+const CW=4186,RW=1000,KDr=.12,KWa=.57,CDr=1200;
+let G,NX,NY,P={},aI=null,isR=false,sT=0;
+const $=id=>document.getElementById(id);
+
+function gP(){
+  const I=+$('hI').value/1000,R=+$('hR').value,L=+$('hL').value/1000;
+  const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
+  const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
+  const zax=+$('zax').value,ztg=+$('ztg').value;
+  const k=KDr+KWa*tw,rc=rd*CDr+RW*CW*tw;
+  const Db=k/rc,Dtg=Db,Dax=Db*an;
+  const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
+  const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
+  NX=Math.floor(50/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
+  const Q=q/(ddx*ddx);
+  const dt=Math.min(.2*ddx*ddx/Math.max(Dtg,Dax),Math.abs(vth)>1e-12?.4*ddx/Math.abs(vth):1e10,.5);
+  return{I,R,L,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,Q,dx:ddx,dt,zax,ztg,vcmh};
+}
+function pPos(p){
+  const cx=Math.floor(NX/2),cy=Math.floor(NY/2),za=Math.round(p.zax/(p.dx*1000)),zt=Math.round(p.ztg/(p.dx*1000));
+  return{H:{x:cx,y:cy,c:'#ef4444',l:'H'},T1:{x:cx,y:cy+za,c:'#3b82f6',l:'T1'},T2:{x:cx,y:cy-za,c:'#a855f7',l:'T2'},T3:{x:cx+zt,y:cy,c:'#f59e0b',l:'T3'}};
+}
+function solveSS(p){
+  const{Dtg,Dax,vth,dx,Q,rc,Ta}=p;const pr=pPos(p);
+  G=new Float64Array(NX*NY);G.fill(Ta);
+  const ax=Dtg/(dx*dx),ay=Dax/(dx*dx),bv=vth/(2*dx);
+  const ayn=ay-Math.min(bv,0),ays=ay+Math.max(bv,0),ac=ax+ax+ayn+ays;
+  for(let it=0;it<60000;it++){let mc=0;
+    for(let i=1;i<NX-1;i++)for(let j=1;j<NY-1;j++){
+      const idx=i*NY+j;let S=0;if(i===pr.H.x&&j===pr.H.y)S=Q/rc;
+      const Tn=(ax*G[(i+1)*NY+j]+ax*G[(i-1)*NY+j]+ayn*G[i*NY+(j+1)]+ays*G[i*NY+(j-1)]+S)/ac;
+      const Ts=G[idx]+1.7*(Tn-G[idx]);mc=Math.max(mc,Math.abs(Ts-G[idx]));G[idx]=Ts;}
+    if(mc<5e-8)break;}
+}
+function getHFD(p){
+  const pr=pPos(p),TH=G[pr.H.x*NY+pr.H.y],T1=G[pr.T1.x*NY+pr.T1.y],T2=G[pr.T2.x*NY+pr.T2.y],T3=G[pr.T3.x*NY+pr.T3.y];
+  const ds=T1-T2,da=T3-T2,dsa=ds-da,ratio=Math.abs(da)>1e-9?ds/da:0;
+  return{TH,T1,T2,T3,ds,da,dsa,ratio};
+}
+
+// ============ DIURNAL: smooth continuous curve ============
+let dData=null,dAI=null,dIdx=0,tsH=[];let Kval=null;
+
+function genD(){
+  const pk=+$('pkV').value,phr=+$('pkH').value,nm=+$('nM').value,nl=+$('nL').value,tp=$('dTp').value;
+  dData=[];tsH=[];Kval=null;
+  const dm=10,n=24*60/dm;
+  // Use smooth raised-cosine: v(h) = nm + (pk-nm) * f(h)
+  // where f(h) is a smooth bell that peaks at phr
+  // f(h) = max(0, cos(pi*(h-phr)/dayWidth))^2  for |h-phr| < dayWidth
+  const dayWidth = 7.5; // hours from peak to ~zero on each side
+  for(let i=0;i<n;i++){
+    const h=i*dm/60;
+    let f=0;
+    const dist=h-phr;
+    if(Math.abs(dist)<dayWidth){
+      const c=Math.cos(Math.PI*dist/(2*dayWidth));
+      f=c*c; // smooth cos^2 bell
+    }
+    let v=nm+(pk-nm)*f;
+    // weather modifiers (applied smoothly)
+    if(tp==='cloudy'){
+      // midday dip: reduce around 12.5h
+      const dip=Math.exp(-0.5*((h-12.5)/1.2)**2);
+      v-=(pk-nm)*0.3*dip*f;
+    } else if(tp==='drought'){
+      // early shutdown: exponential decay after 11h
+      if(h>11){
+        const decay=Math.exp(-0.25*(h-11));
+        const fOrig=f;
+        f*=decay;
+        v=nm+(pk-nm)*f;
+      }
+    }
+    // noise
+    v+=pk*nl*(Math.random()-0.5)*2;
+    // no hard clamp - allow negative if nm < 0
+    dData.push({h,v});
+  }
+  drawDC(-1);$('dI').textContent=n+' pts.';
+}
+
+function drawDC(ci){
+  if(!dData)return;const c=$('dC'),cx=c.getContext('2d'),w=c.width,h=c.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='#0d1117';cx.fillRect(0,0,w,h);
+  let mx=-Infinity,mn=Infinity;for(const d of dData){if(d.v>mx)mx=d.v;if(d.v<mn)mn=d.v}
+  if(mx===mn){mx+=1;mn-=1}
+  const range=mx-mn;
+  // zero line
+  if(mn<0&&mx>0){const y0=h-(0-mn)/range*(h-10)-5;cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=.5;cx.beginPath();cx.moveTo(0,y0);cx.lineTo(w,y0);cx.stroke()}
+  cx.beginPath();cx.strokeStyle='#f59e0b';cx.lineWidth=1.5;
+  for(let i=0;i<dData.length;i++){const px=(dData[i].h/24)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
+  if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/24)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
+  cx.fillStyle='rgba(255,255,255,.3)';cx.font='7px JetBrains Mono';
+  for(let hr=0;hr<=24;hr+=6)cx.fillText(hr+'h',(hr/24)*w+2,h-1);
+}
+
+function playD(){
+  if(!dData||!dData.length)genD();stopD();dIdx=0;tsH=[];Kval=null;
+  function step(){
+    if(dIdx>=dData.length){stopD();$('dI').textContent='Done.';return}
+    const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
+    P=gP();solveSS(P);const hfd=getHFD(P);
+    tsH.push({h:d.h,v:d.v,...hfd,Kda:0});computeK();
+    render(P);drawKD(dIdx);drawTS();drawDC(dIdx);
+    const hs=Math.floor(d.h).toString().padStart(2,'0')+':'+(Math.round((d.h%1)*60)).toString().padStart(2,'0');
+    $('sB').textContent=hs+' | v='+d.v.toFixed(1)+' cm/h';$('dI').textContent=hs+' · v='+d.v.toFixed(1)+' cm/h';
+    dIdx++;dAI=setTimeout(step,20);
+  }step();
+}
+function stopD(){if(dAI){clearTimeout(dAI);dAI=null}}
+
+function computeK(){
+  // Use low-flow points: those with smallest absolute ratio
+  const sorted=[...tsH].sort((a,b)=>Math.abs(a.ratio)-Math.abs(b.ratio));
+  const lowFlow=sorted.slice(0,Math.max(3,Math.floor(tsH.length*0.15)));
+  if(lowFlow.length<2){Kval=lowFlow.length?lowFlow[0].da:null;}
+  else{let sx=0,sy=0,sxx=0,sxy=0,n=lowFlow.length;
+    for(const t of lowFlow){sx+=t.ratio;sy+=t.da;sxx+=t.ratio*t.ratio;sxy+=t.ratio*t.da}
+    const den=n*sxx-sx*sx;Kval=Math.abs(den)>1e-15?(sy*sxx-sx*sxy)/den:sy/n;}
+  $('o_K').innerHTML=Kval!==null?Kval.toFixed(2):'—';
+  if(Kval!==null)for(const t of tsH)t.Kda=Kval+t.dsa;
+}
+
+// ============ K-DIAGRAM ============
+function drawKD(ci){
+  const c=$('kC'),cx=c.getContext('2d'),w=c.width,h=c.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='#fff';cx.fillRect(0,0,w,h);
+  if(!tsH.length)return;
+  let xmn=0,xmx=0,ymn=0,ymx=0;
+  for(const t of tsH){if(t.ratio>xmx)xmx=t.ratio;if(t.ratio<xmn)xmn=t.ratio;
+    for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
+  xmn=Math.min(xmn,-.05);xmx=Math.max(xmx,.1);
+  const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;xmx+=.02;
+  const ml=44,mr=10,mt=12,mb=28,pw=w-ml-mr,ph=h-mt-mb;
+  const toX=v=>ml+(v-xmn)/(xmx-xmn)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
+  cx.strokeStyle='#eee';cx.lineWidth=.5;const ys=nS(yr);
+  for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys){cx.beginPath();cx.moveTo(ml,toY(yv));cx.lineTo(ml+pw,toY(yv));cx.stroke()}
+  cx.strokeStyle='#bbb';cx.lineWidth=.7;
+  if(ymn<0&&ymx>0){cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke()}
+  {const x0=toX(0);if(x0>=ml&&x0<=ml+pw){cx.beginPath();cx.moveTo(x0,mt);cx.lineTo(x0,mt+ph);cx.stroke()}}
+  // scatter
+  const dot=(k,col,r)=>{cx.fillStyle=col;for(const t of tsH){cx.beginPath();cx.arc(toX(t.ratio),toY(t[k]),r,0,Math.PI*2);cx.fill()}};
+  dot('dsa','#aaa',2.5);dot('Kda','#5a8a20',2.5);dot('da','#e91e90',2.5);dot('ds','#222',2.5);
+  // current highlight
+  if(ci>=0&&ci<tsH.length){const t=tsH[ci];
+    for(const[k,col] of[['dsa','#aaa'],['Kda','#5a8a20'],['da','#e91e90'],['ds','#222']]){
+      cx.beginPath();cx.arc(toX(t.ratio),toY(t[k]),6.5,0,Math.PI*2);cx.fillStyle=col;cx.fill();cx.strokeStyle='#000';cx.lineWidth=1.3;cx.stroke()}}
+  // K line
+  if(Kval!==null){cx.strokeStyle='rgba(200,0,0,0.55)';cx.lineWidth=1.2;cx.setLineDash([5,3]);
+    cx.beginPath();cx.moveTo(ml,toY(Kval));cx.lineTo(ml+pw,toY(Kval));cx.stroke();cx.setLineDash([]);
+    cx.fillStyle='#c00';cx.font='bold 9px JetBrains Mono';cx.textAlign='left';cx.fillText('K='+Kval.toFixed(2)+'°C',ml+3,toY(Kval)-4)}
+  // axes
+  cx.strokeStyle='#333';cx.lineWidth=1;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
+  cx.fillStyle='#333';cx.font='9px JetBrains Mono';
+  cx.save();cx.translate(11,mt+ph/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('Temperature (°C)',0,0);cx.restore();
+  cx.textAlign='center';cx.fillText('Ratio dTsym/dTas',ml+pw/2,h-4);
+  cx.font='7px JetBrains Mono';cx.fillStyle='#666';cx.textAlign='right';
+  for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys)cx.fillText(yv.toFixed(1),ml-3,toY(yv)+3);
+  cx.textAlign='center';const xs=nS(xmx-xmn);
+  for(let xv=Math.ceil(xmn/xs)*xs;xv<=xmx;xv+=xs)cx.fillText(xv.toFixed(1),toX(xv),mt+ph+12);
+  // LEGEND
+  const lx=ml+pw-120,ly=mt+4,lw=115,lh=62;
+  cx.fillStyle='rgba(255,255,255,0.93)';cx.strokeStyle='#ccc';cx.lineWidth=.7;
+  cx.fillRect(lx,ly,lw,lh);cx.strokeRect(lx,ly,lw,lh);
+  const items=[['#222','dTsym'],['#e91e90','dTas'],['#aaa','dTs-a'],['#5a8a20','K+dTs-a']];
+  cx.font='8px JetBrains Mono';
+  items.forEach(([col,label],i)=>{const iy=ly+10+i*13;cx.fillStyle=col;cx.beginPath();cx.arc(lx+9,iy,3.5,0,Math.PI*2);cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText(label,lx+18,iy+3)});
+}
+function nS(r){const l=Math.floor(Math.log10(r));const p=Math.pow(10,l);if(r/p<2)return p*.2;if(r/p<5)return p*.5;return p}
+
+// ============ TIME SERIES ============
+function drawTS(){
+  const c=$('tC'),cx=c.getContext('2d'),w=c.width,h=c.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='#fff';cx.fillRect(0,0,w,h);
+  if(!tsH.length)return;
+  const ml=40,mr=34,mt=6,mb=14,pw=w-ml-mr,ph=h-mt-mb;
+  let ymn=Infinity,ymx=-Infinity,vmx=1,vmn=0;
+  for(const t of tsH){for(const v of[t.ds,t.da,t.dsa]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}if(t.v>vmx)vmx=t.v;if(t.v<vmn)vmn=t.v}
+  const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;
+  const toX=i=>ml+(tsH[i].h/24)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
+  if(ymn<0&&ymx>0){cx.strokeStyle='#ddd';cx.lineWidth=.5;cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke()}
+  // velocity fill
+  const vrange=vmx-vmn||1;
+  cx.fillStyle='rgba(34,180,34,.06)';cx.beginPath();cx.moveTo(toX(0),mt+ph);
+  for(let i=0;i<tsH.length;i++)cx.lineTo(toX(i),mt+ph-(tsH[i].v-vmn)/vrange*ph);
+  cx.lineTo(toX(tsH.length-1),mt+ph);cx.closePath();cx.fill();
+  cx.beginPath();cx.strokeStyle='#2a2';cx.lineWidth=.7;
+  for(let i=0;i<tsH.length;i++){const y=mt+ph-(tsH[i].v-vmn)/vrange*ph;i?cx.lineTo(toX(i),y):cx.moveTo(toX(i),y)}cx.stroke();
+  const dl=(k,col)=>{cx.beginPath();cx.strokeStyle=col;cx.lineWidth=1.2;for(let i=0;i<tsH.length;i++){const y=toY(tsH[i][k]);i?cx.lineTo(toX(i),y):cx.moveTo(toX(i),y)}cx.stroke()};
+  dl('ds','#222');dl('da','#e91e90');dl('dsa','#999');
+  cx.strokeStyle='#333';cx.lineWidth=.8;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
+  cx.fillStyle='#666';cx.font='7px JetBrains Mono';cx.textAlign='center';
+  for(let hr=0;hr<=24;hr+=4)cx.fillText(hr+'h',ml+(hr/24)*pw,h-2);
+  cx.textAlign='right';cx.fillText(ymx.toFixed(1),ml-2,mt+7);cx.fillText(ymn.toFixed(1),ml-2,mt+ph);
+  cx.fillStyle='#2a2';cx.textAlign='left';cx.fillText(Math.round(vmx)+'cm/h',ml+pw+2,mt+7);
+}
+
+// ============ HEAT FIELD RENDER (jet colormap) ============
+const hc=$('hC'),hctx=hc.getContext('2d'),cbc=$('cbar'),cbctx=cbc.getContext('2d');
+function jet(t){t=Math.max(0,Math.min(1,t));let r,g,b;
+  if(t<.125){r=0;g=0;b=128+t/.125*127}
+  else if(t<.375){const s=(t-.125)/.25;r=0;g=s*255;b=255}
+  else if(t<.625){const s=(t-.375)/.25;r=s*255;g=255;b=255-s*255}
+  else if(t<.875){const s=(t-.625)/.25;r=255;g=255-s*255;b=0}
+  else{const s=(t-.875)/.125;r=255-s*127;g=0;b=0}
+  return[r|0,g|0,b|0]}
+
+function render(p){
+  const w=hc.width,h=hc.height,cW=w/NX,cH=h/NY;
+  let md=0;for(let i=0;i<NX*NY;i++){const d=G[i]-p.Ta;if(d>md)md=d}if(md<.001)md=.001;
+  const img=hctx.createImageData(w,h);
+  for(let px=0;px<w;px++)for(let py=0;py<h;py++){
+    const gi=Math.min(Math.floor(px/cW),NX-1),gj=Math.min(NY-1-Math.floor(py/cH),NY-1);
+    const t=(G[gi*NY+gj]-p.Ta)/md;const[r,g,b]=jet(t);
+    const i4=(py*w+px)*4;img.data[i4]=r;img.data[i4+1]=g;img.data[i4+2]=b;img.data[i4+3]=255;}
+  hctx.putImageData(img,0,0);
+  hctx.strokeStyle='rgba(0,0,0,.12)';hctx.lineWidth=.7;
+  for(let c=1;c<=12;c++){const lv=p.Ta+md*c/13;
+    for(let i=0;i<NX-1;i++)for(let j=0;j<NY-1;j++){
+      const v00=G[i*NY+j],v10=G[(i+1)*NY+j],v01=G[i*NY+(j+1)],v11=G[(i+1)*NY+(j+1)];
+      const b=(v00>=lv?1:0)|(v10>=lv?2:0)|(v01>=lv?4:0)|(v11>=lv?8:0);if(!b||b===15)continue;
+      const x0=i*cW,y0=(NY-1-j)*cH,x1=(i+1)*cW;const pts=[];
+      if((b&1)^((b>>1)&1))pts.push([x0+(lv-v00)/(v10-v00)*cW,y0]);
+      if(((b>>2)&1)^((b>>3)&1))pts.push([x0+(lv-v01)/(v11-v01)*cW,(NY-2-j)*cH]);
+      if((b&1)^((b>>2)&1))pts.push([x0,y0-(lv-v00)/(v01-v00)*cH]);
+      if(((b>>1)&1)^((b>>3)&1))pts.push([x1,y0-(lv-v10)/(v11-v10)*cH]);
+      if(pts.length>=2){hctx.beginPath();hctx.moveTo(pts[0][0],pts[0][1]);hctx.lineTo(pts[1][0],pts[1][1]);hctx.stroke()}}}
+  const pr=pPos(p);
+  for(const k of['H','T1','T2','T3']){const pp=pr[k],sx=pp.x*cW+cW/2,sy=(NY-1-pp.y)*cH+cH/2;
+    hctx.beginPath();hctx.arc(sx,sy,7,0,Math.PI*2);hctx.fillStyle=k==='H'?'#ff0000':'#000';hctx.fill();
+    hctx.strokeStyle='#fff';hctx.lineWidth=2;hctx.stroke();
+    hctx.fillStyle='#fff';hctx.font='bold 9px JetBrains Mono';hctx.fillText(pp.l,sx+10,sy+4)}
+  if(Math.abs(p.vcmh)>0.1){hctx.save();hctx.strokeStyle='#fff';hctx.lineWidth=2.5;hctx.fillStyle='#fff';
+    const dir=p.vcmh>0?-1:1;
+    hctx.beginPath();hctx.moveTo(30,45+dir*20);hctx.lineTo(30,45-dir*15);hctx.stroke();
+    hctx.beginPath();hctx.moveTo(30,45-dir*15);hctx.lineTo(24,45-dir*5);hctx.moveTo(30,45-dir*15);hctx.lineTo(36,45-dir*5);hctx.stroke();
+    hctx.font='10px JetBrains Mono';hctx.fillText((p.vcmh>0?'↑':'↓')+' '+Math.abs(p.vcmh)+' cm/h',6,75);hctx.restore()}
+  for(let py=0;py<240;py++){const t=1-py/240;const[r,g,b]=jet(t);cbctx.fillStyle=`rgb(${r},${g},${b})`;cbctx.fillRect(0,py,18,1)}
+  $('cbMx').textContent='+'+md.toFixed(1)+'°C';$('cbMn').textContent='0';
+  updR(p);
+}
+function updR(p){
+  const hfd=getHFD(p);
+  $('o_k').innerHTML=p.k.toFixed(3);$('o_rc').innerHTML=(p.rc/1e6).toFixed(2);
+  $('o_vt').innerHTML=(p.vth*1000).toFixed(3);
+  $('o_Th').innerHTML=hfd.TH.toFixed(2);$('o_T1').innerHTML=hfd.T1.toFixed(2);
+  $('o_T2').innerHTML=hfd.T2.toFixed(2);$('o_T3').innerHTML=hfd.T3.toFixed(2);
+  $('o_ds').innerHTML=hfd.ds.toFixed(3);$('o_da').innerHTML=hfd.da.toFixed(3);$('o_dsa').innerHTML=hfd.dsa.toFixed(3);
+}
+function updUI(){
+  $('v_zax').textContent=$('zax').value+' mm';$('v_ztg').textContent=$('ztg').value+' mm';
+  $('v_I').textContent=$('hI').value+' mA';$('v_R').textContent=$('hR').value+' Ω';
+  $('v_L').textContent=$('hL').value+' mm';$('v_tw').textContent=(+$('tw').value).toFixed(2);
+  $('v_rd').textContent=$('rd').value+' kg/m³';$('v_an').textContent=(+$('an').value).toFixed(1);
+  $('v_vs').textContent=$('vs').value+' cm/h';$('v_ta').textContent=(+$('ta').value).toFixed(1)+' °C';
+  $('v_dx').textContent=(+$('dx').value).toFixed(2)+' mm';
+  $('v_pk').textContent=$('pkV').value+' cm/h';
+  const phr=+$('pkH').value;$('v_ph').textContent=Math.floor(phr)+':'+(Math.round((phr%1)*60)).toString().padStart(2,'0');
+  $('v_nm').textContent=(+$('nM').value).toFixed(1)+' cm/h';
+  $('v_nl').textContent=(+$('nL').value).toFixed(2);
+  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.q.toFixed(2)+'W/m';
+}
+document.querySelectorAll('input[type=range],select').forEach(e=>e.addEventListener('input',updUI));
+function stopS(){if(aI)cancelAnimationFrame(aI);isR=false}
+function runTr(){stopS();stopD();isR=true;P=gP();G=new Float64Array(NX*NY);G.fill(P.Ta);sT=0;
+  const spf=Math.max(1,Math.floor(20/Math.max(P.dt*1000,.01)));
+  (function a(){const{Dtg,Dax,vth,dx,dt,Q,rc,Ta}=P;const rx=Dtg*dt/(dx*dx),ry=Dax*dt/(dx*dx),cv=vth*dt/dx;
+  const pr=pPos(P),hx=pr.H.x,hy=pr.H.y,src=(Q/rc)*dt;
+  for(let s=0;s<spf;s++){const old=new Float64Array(G);
+    for(let i=1;i<NX-1;i++)for(let j=1;j<NY-1;j++){const idx=i*NY+j,Tc=old[idx];
+      let d=rx*(old[(i+1)*NY+j]-2*Tc+old[(i-1)*NY+j])+ry*(old[i*NY+(j+1)]-2*Tc+old[i*NY+(j-1)]);
+      if(cv>=0)d-=cv*(Tc-old[i*NY+(j-1)]);else d-=cv*(old[i*NY+(j+1)]-Tc);
+      if(i===hx&&j===hy)d+=src;G[idx]=Tc+d;}
+    for(let i=0;i<NX;i++){G[i*NY]=Ta;G[i*NY+(NY-1)]=Ta}
+    for(let j=0;j<NY;j++){G[j]=Ta;G[(NX-1)*NY+j]=Ta}sT+=dt;}
+  render(P);$('sB').textContent='t='+sT.toFixed(1)+'s';if(isR)aI=requestAnimationFrame(a)})()}
+function runSS(){stopS();stopD();P=gP();$('sB').textContent='Computing...';setTimeout(()=>{solveSS(P);render(P);$('sB').textContent='Steady state'},15)}
+
+hc.addEventListener('mousemove',e=>{
+  if(!G||!P.dx)return;const r=hc.getBoundingClientRect(),sx=hc.width/r.width,sy=hc.height/r.height;
+  const px=(e.clientX-r.left)*sx,py=(e.clientY-r.top)*sy;
+  const gi=Math.floor(px/(hc.width/NX)),gj=NY-1-Math.floor(py/(hc.height/NY));
+  if(gi>=0&&gi<NX&&gj>=0&&gj<NY){const T=G[gi*NY+gj],xm=(gi-Math.floor(NX/2))*P.dx*1000,ym=(gj-Math.floor(NY/2))*P.dx*1000;
+    $('o_m').innerHTML='('+xm.toFixed(1)+','+ym.toFixed(1)+')mm <span style="color:var(--acc)">'+T.toFixed(2)+'°C</span> ΔT='+(T-P.Ta).toFixed(2)}});
+updUI();P=gP();solveSS(P);render(P);
+</script></body></html>
