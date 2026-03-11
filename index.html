@@ -5,13 +5,16 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap');
 :root{--bg:#0a0e17;--pnl:#111827;--brd:#1e293b;--txt:#e2e8f0;--dim:#64748b;--acc:#f59e0b}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden}
-.hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px}
-.hd h1{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:var(--acc)}
-.hd .sub{font-size:14px;color:var(--dim)}
-.main{display:grid;grid-template-columns:320px 1fr 560px;height:calc(100vh - 54px)}
-.pnl{padding:14px 16px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
-.pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);min-height:100vh;overflow:auto}
+.hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hd h1{font-family:'Source Serif 4',serif;font-size:clamp(16px,2.5vw,22px);font-weight:700;color:var(--acc)}
+.hd .sub{font-size:clamp(11px,1.5vw,14px);color:var(--dim)}
+.main{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,2fr) minmax(300px,1.8fr)}
+@media(max-width:1100px){.main{grid-template-columns:1fr 1fr;}.main>.cv{order:-1;grid-column:1/-1}}
+@media(max-width:700px){.main{grid-template-columns:1fr;}.main>.cv{order:-1}}
+.pnl{padding:14px 16px;overflow-y:visible;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
+.pnl{border-bottom:1px solid var(--brd)}
+@media(min-width:1101px){.pnl{border-bottom:none}.pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}}
 .st{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
 .pr{display:flex;justify-content:space-between;align-items:center;margin:3px 0}
 .pl{font-size:15px;color:var(--dim)}.pv{font-size:15px;color:var(--txt);min-width:70px;text-align:right}
@@ -21,10 +24,10 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 .bt{background:var(--acc);color:var(--bg);border:none;padding:7px 16px;font-size:15px;font-family:inherit;font-weight:600;border-radius:4px;cursor:pointer;margin:3px 2px}
 .bt:hover{opacity:.85}.bt.s{background:var(--brd);color:var(--txt)}.bt.g{background:#22c55e;color:var(--bg)}
 .nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:4px;padding:6px 10px;margin:6px 0;font-size:14px;line-height:1.4;color:var(--dim)}.nf code{color:var(--acc)}
-.cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative;padding:16px 0}
+.cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative;padding:16px 0;min-height:320px}
 .rd{background:var(--pnl);border:1px solid var(--brd);border-radius:4px;padding:5px 10px;margin:3px 0}
 .rt{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:2px}
-.rv{font-size:20px;font-weight:600;color:var(--acc)}.ru{font-size:12px;color:var(--dim);margin-left:3px}
+.rv{font-size:clamp(14px,2vw,20px);font-weight:600;color:var(--acc);word-break:break-all}.ru{font-size:12px;color:var(--dim);margin-left:3px}
 .lb{display:flex;flex-direction:column;gap:4px;margin:5px 0;padding:8px 10px;background:var(--pnl);border:1px solid var(--brd);border-radius:4px}
 .li{display:flex;align-items:center;gap:7px;font-size:15px;color:var(--dim)}
 .ld{width:12px;height:12px;border-radius:50%;border:2px solid #fff;flex-shrink:0}
@@ -133,9 +136,9 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 
 <div class="st">K-Diagram (Nadezhdina 2018)</div>
-<canvas id=kC width=640 height=440 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<canvas id=kC width=640 height=440 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;height:auto"></canvas>
 <div class="st">Time Series (24h)</div>
-<canvas id=tC width=640 height=300 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
+<canvas id=tC width=640 height=300 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;height:auto"></canvas>
 <div style="display:flex;gap:12px;justify-content:center;margin:4px 0;font-size:14px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
 <div class="st">Cursor</div>
 <div class="rd"><div class="rv" id="o_m" style="font-size:15px">Hover heat field</div></div>
@@ -381,9 +384,9 @@ const hc=$('hC'),cbc=$('cbar');
 let hctx=hc.getContext('2d'),cbctx=cbc.getContext('2d');
 function resizeCanvas(){
   const wrap=$('cvWrap');
-  const avH=wrap.clientHeight-40; // padding + x-axis label
-  const avW=wrap.clientWidth-70; // y-label + colorbar
-  const sz=Math.max(200,Math.min(avW,avH));
+  const avW=wrap.clientWidth-80;
+  const avH=window.innerHeight-100;
+  const sz=Math.max(180,Math.min(avW,avH,560));
   hc.width=sz;hc.height=sz;hc.style.width=sz+'px';hc.style.height=sz+'px';
   $('yLabel').style.height=sz+'px';
   const cbH=Math.round(sz*0.45);
