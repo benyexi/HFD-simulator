@@ -144,7 +144,8 @@ function pPos(p){
 function solveSS(p){
   const{Dtg,Dax,vth,dx,Q,rc,Ta}=p;const pr=pPos(p);
   G=new Float64Array(NX*NY);G.fill(Ta);
-  const ax=Dtg/(dx*dx),ay=Dax/(dx*dx),bv=vth/(2*dx);
+  // First-order upwind: advection coefficient = v_th/dx (NOT v_th/(2dx))
+  const ax=Dtg/(dx*dx),ay=Dax/(dx*dx),bv=vth/dx;
   const ayn=ay-Math.min(bv,0),ays=ay+Math.max(bv,0),ac=ax+ax+ayn+ays;
   for(let it=0;it<60000;it++){let mc=0;
     for(let i=1;i<NX-1;i++)for(let j=1;j<NY-1;j++){
