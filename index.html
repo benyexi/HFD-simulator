@@ -141,9 +141,9 @@ function pPos(p){
   const cx=Math.floor(NX/2),cy=Math.floor(NY/2),za=Math.round(p.zax/(p.dx*1000)),zt=Math.round(p.ztg/(p.dx*1000));
   return{H:{x:cx,y:cy,c:'#ef4444',l:'H'},T1:{x:cx,y:cy+za,c:'#3b82f6',l:'T1'},T2:{x:cx,y:cy-za,c:'#a855f7',l:'T2'},T3:{x:cx+zt,y:cy,c:'#f59e0b',l:'T3'}};
 }
-function solveSS(p){
+function solveSS(p,warm){
   const{Dtg,Dax,vth,dx,Q,rc,Ta}=p;const pr=pPos(p);
-  G=new Float64Array(NX*NY);G.fill(Ta);
+  if(!warm||!G||G.length!==NX*NY){G=new Float64Array(NX*NY);G.fill(Ta);}
   // First-order upwind: advection coefficient = v_th/dx (NOT v_th/(2dx))
   const ax=Dtg/(dx*dx),ay=Dax/(dx*dx),bv=vth/dx;
   const ayn=ay-Math.min(bv,0),ays=ay+Math.max(bv,0),ac=ax+ax+ayn+ays;
@@ -222,7 +222,7 @@ function playD(){
   function step(){
     if(dIdx>=dData.length){stopD();$('dI').textContent='Done.';return}
     const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
-    P=gP();solveSS(P);const hfd=getHFD(P);
+    P=gP();solveSS(P,dIdx>0);const hfd=getHFD(P);
     tsH.push({h:d.h,v:d.v,...hfd,Kda:0});computeK();
     render(P);drawKD(dIdx);drawTS();drawDC(dIdx);
     const hs=Math.floor(d.h).toString().padStart(2,'0')+':'+(Math.round((d.h%1)*60)).toString().padStart(2,'0');
@@ -251,9 +251,12 @@ function drawKD(ci){
   if(!tsH.length)return;
   let ymn=0,ymx=0;
   const rats=tsH.map(t=>t.ratio).sort((a,b)=>a-b);
-  let xmn=rats[Math.floor(rats.length*.02)]||0,xmx=rats[Math.ceil(rats.length*.98)-1]||0;
-  const xpad=(xmx-xmn)*.08||.05;xmn-=xpad;xmx+=xpad;
-  xmn=Math.min(xmn,-.05);xmx=Math.max(xmx,.1);
+  const q1=rats[Math.floor(rats.length*.25)]||0,q3=rats[Math.ceil(rats.length*.75)-1]||0;
+  const iqr=q3-q1||.1;
+  let xmn=Math.min(q1-1.5*iqr,rats[0]>-1?rats[0]:q1-1.5*iqr);
+  let xmx=Math.max(q3+1.5*iqr,rats[rats.length-1]<2?rats[rats.length-1]:q3+1.5*iqr);
+  xmn=Math.min(xmn,-.2);xmx=Math.max(xmx,.5);
+  const xpad=(xmx-xmn)*.05;xmn-=xpad;xmx+=xpad;
   for(const t of tsH){for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
   const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;xmx+=.02;
   const ml=60,mr=16,mt=18,mb=44,pw=w-ml-mr,ph=h-mt-mb;
