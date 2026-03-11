@@ -29,18 +29,35 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 .li{display:flex;align-items:center;gap:7px;font-size:15px;color:var(--dim)}
 .ld{width:12px;height:12px;border-radius:50%;border:2px solid #fff;flex-shrink:0}
 .sts{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:4px 10px;border-radius:4px;font-size:14px;color:var(--dim)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--pnl);border:1px solid var(--brd);border-radius:8px;width:720px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:20px 28px;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
+.modal h2{font-family:'Source Serif 4',serif;font-size:20px;color:var(--acc);margin-bottom:12px}
+.modal table{width:100%;border-collapse:collapse;font-size:14px}
+.modal th{text-align:left;color:var(--acc);padding:6px 8px;border-bottom:1px solid var(--brd);font-size:12px;text-transform:uppercase;letter-spacing:.8px}
+.modal td{padding:5px 8px;border-bottom:1px solid rgba(30,41,59,.5);vertical-align:top}
+.modal td:first-child{color:var(--txt);font-weight:600;white-space:nowrap;min-width:100px}
+.modal td:nth-child(2){color:var(--dim)}
+.modal td:nth-child(3){color:var(--txt)}
+.modal td:nth-child(4){color:var(--dim);white-space:nowrap;text-align:right}
+.modal .sec{color:var(--acc);font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:12px 8px 4px;border:none}
+.bt.help{background:transparent;border:1px solid var(--brd);color:var(--dim);padding:5px 12px;font-size:14px}
 </style></head><body>
-<div class="hd"><h1>HFD Heat Field Simulator</h1><span class="sub">Nadezhdina 4-needle HFD · 2D FD solver · K-diagram · Diurnal</span></div>
+<div class="hd"><h1>HFD Heat Field Simulator</h1><span class="sub">Nadezhdina 4-needle HFD · 2D FD solver · K-diagram · Diurnal</span><button class="bt help" onclick="$('glossary').classList.add('open')">? Glossary</button></div>
 <div class="main">
 <!-- LEFT -->
 <div class="pnl">
 <div class="st">Probe Geometry</div>
 <div class="pr"><span class="pl">Z_ax</span><span class="pv" id="v_zax">15 mm</span></div><input type=range id=zax min=5 max=30 value=15 step=1>
 <div class="pr"><span class="pl">Z_tg</span><span class="pv" id="v_ztg">5 mm</span></div><input type=range id=ztg min=2 max=15 value=5 step=1>
+<div class="st">Probe Dimensions</div>
+<div class="pr"><span class="pl">Heater L (加热探针)</span><span class="pv" id="v_L">100 mm</span></div><input type=range id=hL min=20 max=120 value=100 step=5>
+<div class="pr"><span class="pl">Temp L (测温探针)</span><span class="pv" id="v_tL">100 mm</span></div><input type=range id=tL min=20 max=120 value=100 step=5>
+<div class="pr"><span class="pl">Meas. depth (测温深度)</span><span class="pv" id="v_md">50 mm</span></div><input type=range id=mD min=5 max=100 value=50 step=1>
+<div class="nf" id="probeWarn" style="display:none;color:#ef4444;border-color:rgba(239,68,68,0.3)"></div>
 <div class="st">Heating (~50mA continuous)</div>
 <div class="pr"><span class="pl">Current I</span><span class="pv" id="v_I">50 mA</span></div><input type=range id=hI min=20 max=150 value=50 step=1>
 <div class="pr"><span class="pl">Resistance R</span><span class="pv" id="v_R">120 Ω</span></div><input type=range id=hR min=40 max=300 value=120 step=5>
-<div class="pr"><span class="pl">Needle L</span><span class="pv" id="v_L">100 mm</span></div><input type=range id=hL min=20 max=120 value=100 step=5>
 <div class="nf"><code id="pwD">P=0.300W q=3.00W/m</code></div>
 <div class="st">Sapwood</div>
 <div class="pr"><span class="pl">θ_w</span><span class="pv" id="v_tw">0.40</span></div><input type=range id=tw min=.10 max=.80 value=.40 step=.01>
@@ -60,8 +77,15 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="pr"><span class="pl">Noise</span><span class="pv" id="v_nl">0.03</span></div><input type=range id=nL min=0 max=.15 value=.03 step=.01>
 <select id=dTp><option value=sunny>Sunny</option><option value=cloudy>Cloudy (midday dip)</option><option value=drought>Drought (early shutdown)</option></select>
 <div><button class="bt" onclick="genD()">Generate</button><button class="bt g" onclick="playD()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
+<div class="pr"><span class="pl">Speed</span><span class="pv" id="v_sp">1x</span></div><input type=range id=spd min=1 max=50 value=1 step=1>
 <canvas id=dC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%"></canvas>
 <div class="nf" id="dI">Generate → Play</div>
+
+<div class="st">Upload Sap Flow Data</div>
+<input type=file id=upFile accept=".csv,.txt" style="display:none">
+<div><button class="bt" onclick="$('upFile').click()">Upload CSV</button><button class="bt g" onclick="playUp()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
+<canvas id=uC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%;display:none"></canvas>
+<div class="nf" id="uI">CSV: col1=time, col2=v_sap (cm/h)<br>Time: <code>2024-01-15 08:30</code> or <code>08:30</code><br>Min 144 rows (1 day), max 14400.</div>
 </div>
 
 <!-- CENTER -->
@@ -125,17 +149,23 @@ const $=id=>document.getElementById(id);
 
 function gP(){
   const I=+$('hI').value/1000,R=+$('hR').value,L=+$('hL').value/1000;
+  const tL=+$('tL').value/1000,mD=+$('mD').value/1000; // temp probe length, meas depth (m)
   const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
   const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
   const zax=+$('zax').value,ztg=+$('ztg').value;
   const Gb=rd/RW,u=tw*RW/rd,k=.10+.20*Gb+.60*tw,rc=rd*CDr+RW*CW*tw;
   const Db=k/rc,Dtg=Db,Dax=Db*an;
   const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
-  const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
+  const Pw=I*I*R,qnom=Pw/L,ddx=dxm/1000;
+  // End-effect correction: near heater probe ends the effective q is reduced
+  // f approaches 1 in the middle, drops near ends (characteristic length ~5mm)
+  const r0=0.005;
+  const fEnd=Math.min(1,1-Math.exp(-mD/r0)-Math.exp(-(L-mD)/r0));
+  const q=qnom*Math.max(0.1,fEnd);
   NX=Math.floor(70/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
   const Q=q/(ddx*ddx);
   const dt=Math.min(.2*ddx*ddx/Math.max(Dtg,Dax),Math.abs(vth)>1e-12?.4*ddx/Math.abs(vth):1e10,.5);
-  return{I,R,L,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,Q,dx:ddx,dt,zax,ztg,vcmh};
+  return{I,R,L,tL,mD,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,qnom,Q,dx:ddx,dt,zax,ztg,vcmh,fEnd};
 }
 function pPos(p){
   const cx=Math.floor(NX/2),cy=Math.floor(NY/2),za=Math.round(p.zax/(p.dx*1000)),zt=Math.round(p.ztg/(p.dx*1000));
@@ -162,6 +192,7 @@ function getHFD(p){
 
 // ============ DIURNAL: smooth continuous curve ============
 let dData=null,dAI=null,dIdx=0,tsH=[];let Kval=null;
+let upData=null,useUpload=false;
 
 function genD(){
   const pk=+$('pkV').value,phr=+$('pkH').value,nm=+$('nM').value,nl=+$('nL').value,tp=$('dTp').value;
@@ -207,29 +238,40 @@ function drawDC(ci){
   cx.clearRect(0,0,w,h);cx.fillStyle='#0d1117';cx.fillRect(0,0,w,h);
   let mx=-Infinity,mn=Infinity;for(const d of dData){if(d.v>mx)mx=d.v;if(d.v<mn)mn=d.v}
   if(mx===mn){mx+=1;mn-=1}
-  const range=mx-mn;
-  // zero line
+  const range=mx-mn,maxH=dData[dData.length-1].h||24;
   if(mn<0&&mx>0){const y0=h-(0-mn)/range*(h-10)-5;cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=.5;cx.beginPath();cx.moveTo(0,y0);cx.lineTo(w,y0);cx.stroke()}
   cx.beginPath();cx.strokeStyle='#f59e0b';cx.lineWidth=1.5;
-  for(let i=0;i<dData.length;i++){const px=(dData[i].h/24)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
-  if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/24)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
+  const ds=Math.max(1,Math.floor(dData.length/w));
+  for(let i=0;i<dData.length;i+=ds){const px=(dData[i].h/maxH)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
+  if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/maxH)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
   cx.fillStyle='rgba(255,255,255,.3)';cx.font='9px JetBrains Mono';
-  for(let hr=0;hr<=24;hr+=6)cx.fillText(hr+'h',(hr/24)*w+2,h-1);
+  if(maxH<=48){for(let hr=0;hr<=maxH;hr+=6)cx.fillText(hr+'h',(hr/maxH)*w+2,h-1)}
+  else{const nD=Math.ceil(maxH/24),st=Math.max(1,Math.ceil(nD/8));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),(d*24/maxH)*w+2,h-1)}
 }
 
 function playD(){
-  if(!dData||!dData.length)genD();stopD();dIdx=0;tsH=[];Kval=null;
+  if(!dData||!dData.length)genD();stopD();useUpload=false;dIdx=0;tsH=[];Kval=null;playLoop();}
+function playUp(){
+  if(!upData||!upData.length){$('uI').textContent='No data uploaded';return}
+  stopD();stopS();dData=[...upData];useUpload=true;dIdx=0;tsH=[];Kval=null;playLoop();}
+function playLoop(){
   function step(){
-    if(dIdx>=dData.length){stopD();$('dI').textContent='Done.';return}
-    const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
-    P=gP();solveSS(P,dIdx>0);const hfd=getHFD(P);
-    tsH.push({h:d.h,v:d.v,...hfd,Kda:0});computeK();
-    render(P);drawKD(dIdx);drawTS();drawDC(dIdx);
-    const hs=Math.floor(d.h).toString().padStart(2,'0')+':'+(Math.round((d.h%1)*60)).toString().padStart(2,'0');
-    $('sB').textContent=hs+' | v='+d.v.toFixed(1)+' cm/h';$('dI').textContent=hs+' · v='+d.v.toFixed(1)+' cm/h';
-    dIdx++;dAI=setTimeout(step,20);
-  }step();
-}
+    if(dIdx>=dData.length){stopD();const msg='Done ('+dData.length+' pts)';$('dI').textContent=msg;if(useUpload)$('uI').textContent=msg;return}
+    const spd=+$('spd').value,batch=Math.max(1,spd);
+    for(let b=0;b<batch&&dIdx<dData.length;b++){
+      const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
+      P=gP();solveSS(P,dIdx>0);const hfd=getHFD(P);
+      tsH.push({h:d.h,v:d.v,...hfd,Kda:0});dIdx++;}
+    computeK();render(P);drawKD(tsH.length-1);drawTS();
+    if(useUpload)drawUC(dIdx-1);else drawDC(dIdx-1);
+    const d=dData[dIdx-1],totalH=d.h,day=Math.floor(totalH/24)+1,hInDay=totalH%24;
+    const hh=Math.floor(hInDay).toString().padStart(2,'0'),mm=(Math.round((hInDay%1)*60)).toString().padStart(2,'0');
+    const prefix=dData.length>144?'D'+day+' ':'';
+    const label=prefix+hh+':'+mm+' | v='+d.v.toFixed(1)+' cm/h';
+    $('sB').textContent=label;$('dI').textContent=label;
+    if(useUpload)$('uI').textContent=label+' ('+dIdx+'/'+dData.length+')';
+    dAI=setTimeout(step,20);
+  }step();}
 function stopD(){if(dAI){clearTimeout(dAI);dAI=null}}
 
 function computeK(){
@@ -306,7 +348,8 @@ function drawTS(){
   let ymn=Infinity,ymx=-Infinity,vmx=1,vmn=0;
   for(const t of tsH){for(const v of[t.ds,t.da,t.dsa]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}if(t.v>vmx)vmx=t.v;if(t.v<vmn)vmn=t.v}
   const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;
-  const toX=i=>ml+(tsH[i].h/24)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
+  const maxH=tsH[tsH.length-1].h||24;
+  const toX=i=>ml+(tsH[i].h/maxH)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
   if(ymn<0&&ymx>0){cx.strokeStyle='#ddd';cx.lineWidth=.5;cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke()}
   // velocity fill
   const vrange=vmx-vmn||1;
@@ -324,7 +367,8 @@ function drawTS(){
   cx.textAlign='center';cx.fillText('Time (h)',ml+pw/2,h-4);
   // tick labels
   cx.fillStyle='#666';cx.font='12px JetBrains Mono';cx.textAlign='center';
-  for(let hr=0;hr<=24;hr+=4)cx.fillText(hr+'h',ml+(hr/24)*pw,mt+ph+20);
+  if(maxH<=48){for(let hr=0;hr<=maxH;hr+=Math.max(4,Math.ceil(maxH/24)*4))cx.fillText(hr+'h',ml+(hr/maxH)*pw,mt+ph+20)}
+  else{const nD=Math.ceil(maxH/24),st=Math.max(1,Math.ceil(nD/10));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),ml+(d*24/maxH)*pw,mt+ph+20)}
   cx.textAlign='right';
   const ys=nS(yr);
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys)cx.fillText(yv.toFixed(1),ml-4,toY(yv)+4);
@@ -410,7 +454,9 @@ function updR(p){
 function updUI(){
   $('v_zax').textContent=$('zax').value+' mm';$('v_ztg').textContent=$('ztg').value+' mm';
   $('v_I').textContent=$('hI').value+' mA';$('v_R').textContent=$('hR').value+' Ω';
-  $('v_L').textContent=$('hL').value+' mm';$('v_tw').textContent=(+$('tw').value).toFixed(2);
+  $('v_L').textContent=$('hL').value+' mm';$('v_tL').textContent=$('tL').value+' mm';
+  $('v_md').textContent=$('mD').value+' mm';
+  $('v_tw').textContent=(+$('tw').value).toFixed(2);
   $('v_rd').textContent=$('rd').value+' kg/m³';$('v_an').textContent=(+$('an').value).toFixed(1);
   $('v_vs').textContent=$('vs').value+' cm/h';$('v_ta').textContent=(+$('ta').value).toFixed(1)+' °C';
   $('v_dx').textContent=(+$('dx').value).toFixed(2)+' mm';
@@ -418,7 +464,15 @@ function updUI(){
   const phr=+$('pkH').value;$('v_ph').textContent=Math.floor(phr)+':'+(Math.round((phr%1)*60)).toString().padStart(2,'0');
   $('v_nm').textContent=(+$('nM').value).toFixed(1)+' cm/h';
   $('v_nl').textContent=(+$('nL').value).toFixed(2);
-  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.q.toFixed(2)+'W/m';
+  $('v_sp').textContent=$('spd').value+'x';
+  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.qnom.toFixed(2)+'W/m (eff '+p.q.toFixed(2)+')';
+  // Validate measurement depth vs probe lengths
+  const md=+$('mD').value,hLen=+$('hL').value,tLen=+$('tL').value;
+  const warn=$('probeWarn');
+  if(md>hLen||md>tLen){
+    const msgs=[];if(md>hLen)msgs.push('depth > heater ('+hLen+'mm)');if(md>tLen)msgs.push('depth > temp probe ('+tLen+'mm)');
+    warn.textContent='Warning: '+msgs.join(', ');warn.style.display='block';
+  }else warn.style.display='none';
 }
 document.querySelectorAll('input[type=range],select').forEach(e=>e.addEventListener('input',updUI));
 function stopS(){if(aI)cancelAnimationFrame(aI);isR=false}
@@ -436,6 +490,60 @@ function runTr(){stopS();stopD();isR=true;P=gP();G=new Float64Array(NX*NY);G.fil
   render(P);$('sB').textContent='t='+sT.toFixed(1)+'s';if(isR)aI=requestAnimationFrame(a)})()}
 function runSS(){stopS();stopD();P=gP();$('sB').textContent='Computing...';setTimeout(()=>{solveSS(P);render(P);$('sB').textContent='Steady state'},15)}
 
+// ============ UPLOAD SAP FLOW DATA ============
+function parseTS(s){
+  // Full datetime: "2024-01-15 08:30:00", "2024/01/15 08:30"
+  let d=new Date(s.replace(' ','T'));if(!isNaN(d.getTime()))return d.getTime();
+  // With slash: "01/15/2024 08:30"
+  d=new Date(s);if(!isNaN(d.getTime()))return d.getTime();
+  // Time only: "08:30" or "08:30:00"
+  const m=s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if(m)return(+m[1])*3600000+(+m[2])*60000+(m[3]?+m[3]*1000:0);
+  return null;
+}
+$('upFile').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const lines=ev.target.result.trim().split(/\r?\n/);
+    let si=0;if(/[a-zA-Z]/.test(lines[0].split(/[,\t;]+/)[0]))si=1;
+    const rows=[];let timeOnly=false;
+    for(let i=si;i<lines.length;i++){const ln=lines[i].trim();if(!ln)continue;
+      // Split on comma or tab or semicolon, but keep datetime together
+      const sep=ln.indexOf('\t')>=0?'\t':ln.indexOf(';')>=0?';':',';
+      const ps=ln.split(sep);if(ps.length<2)continue;
+      const ts=ps[0].trim(),v=parseFloat(ps[1]);if(isNaN(v))continue;
+      const ms=parseTS(ts);if(ms===null)continue;
+      if(/^\d{1,2}:\d{2}/.test(ts)&&!/\d{4}/.test(ts))timeOnly=true;
+      rows.push({ms,v});}
+    if(rows.length<144){$('uI').textContent='Error: need >= 144 rows (time, velocity)';return}
+    if(rows.length>14400)rows.length=14400;
+    const t0=rows[0].ms;
+    upData=rows.map(r=>({h:(r.ms-t0)/3600000,v:r.v}));
+    // For time-only data, fix midnight wraps
+    if(timeOnly)for(let i=1;i<upData.length;i++)while(upData[i].h<upData[i-1].h)upData[i].h+=24;
+    const nD=(upData[upData.length-1].h/24).toFixed(1);
+    $('uI').textContent=file.name+': '+rows.length+' pts ('+nD+' days)';
+    $('uC').style.display='block';drawUC(-1);
+  };reader.readAsText(file);e.target.value='';
+});
+function drawUC(ci){
+  if(!upData)return;const c=$('uC'),cx=c.getContext('2d'),w=c.width,h=c.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='#0d1117';cx.fillRect(0,0,w,h);
+  let mx=-Infinity,mn=Infinity;for(const d of upData){if(d.v>mx)mx=d.v;if(d.v<mn)mn=d.v}
+  if(mx===mn){mx+=1;mn-=1}
+  const range=mx-mn,maxH=upData[upData.length-1].h||24;
+  if(mn<0&&mx>0){const y0=h-(0-mn)/range*(h-10)-5;cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=.5;cx.beginPath();cx.moveTo(0,y0);cx.lineTo(w,y0);cx.stroke()}
+  const ds=Math.max(1,Math.floor(upData.length/w));
+  cx.beginPath();cx.strokeStyle='#22c55e';cx.lineWidth=1;
+  for(let i=0;i<upData.length;i+=ds){const px=(upData[i].h/maxH)*w,py=h-(upData[i].v-mn)/range*(h-10)-5;i===0?cx.moveTo(px,py):cx.lineTo(px,py)}cx.stroke();
+  if(ci>=0&&ci<upData.length){const d=upData[ci],px=(d.h/maxH)*w;cx.strokeStyle='rgba(239,68,68,0.8)';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(px,0);cx.lineTo(px,h);cx.stroke()}
+  cx.fillStyle='rgba(255,255,255,.3)';cx.font='9px JetBrains Mono';
+  const nD=Math.ceil(maxH/24);
+  if(nD<=2){for(let hr=0;hr<=maxH;hr+=6)cx.fillText(hr+'h',(hr/maxH)*w+2,h-1)}
+  else{const st=Math.max(1,Math.ceil(nD/8));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),(d*24/maxH)*w+2,h-1)}
+}
+
 hc.addEventListener('mousemove',e=>{
   if(!G||!P.dx)return;const r=hc.getBoundingClientRect(),sx=hc.width/r.width,sy=hc.height/r.height;
   const px=(e.clientX-r.left)*sx,py=(e.clientY-r.top)*sy;
@@ -443,4 +551,122 @@ hc.addEventListener('mousemove',e=>{
   if(gi>=0&&gi<NX&&gj>=0&&gj<NY){const T=G[gi*NY+gj],xm=(gi-Math.floor(NX/2))*P.dx*1000,ym=(gj-Math.floor(NY/2))*P.dx*1000;
     $('o_m').innerHTML='('+xm.toFixed(1)+','+ym.toFixed(1)+')mm <span style="color:var(--acc)">'+T.toFixed(2)+'°C</span> ΔT='+(T-P.Ta).toFixed(2)}});
 updUI();P=gP();resizeCanvas();solveSS(P);render(P);
-</script></body></html>
+</script>
+
+<div class="modal-bg" id="glossary" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h2>Variable Glossary / 变量说明</h2>
+<button class="bt s" onclick="$('glossary').classList.remove('open')" style="padding:4px 12px">✕</button>
+</div>
+
+<h3 style="color:var(--acc);font-size:14px;margin:10px 0 6px;letter-spacing:.5px">Quick Reference / 速查表</h3>
+<table>
+<tr><th>Symbol</th><th>Name</th><th>中文名</th><th>Unit</th></tr>
+<tr><td>Z_ax</td><td>Axial spacing</td><td>轴向间距</td><td>mm</td></tr>
+<tr><td>Z_tg</td><td>Tangential spacing</td><td>切向间距</td><td>mm</td></tr>
+<tr><td>Heater L</td><td>Heater probe length</td><td>加热探针长度</td><td>mm</td></tr>
+<tr><td>Temp L</td><td>Temperature probe length</td><td>测温探针长度</td><td>mm</td></tr>
+<tr><td>Meas. depth</td><td>Measurement depth</td><td>测温点深度(距边材外表面)</td><td>mm</td></tr>
+<tr><td>I</td><td>Heating current</td><td>加热电流</td><td>mA</td></tr>
+<tr><td>R</td><td>Heater resistance</td><td>加热丝电阻</td><td>&Omega;</td></tr>
+<tr><td>P</td><td>Heating power (I&sup2;R)</td><td>加热功率</td><td>W</td></tr>
+<tr><td>q</td><td>Linear heat flux (P/L)</td><td>线热源功率密度</td><td>W/m</td></tr>
+<tr><td>&theta;_w</td><td>Sapwood water content</td><td>边材体积含水率</td><td>m&sup3;/m&sup3;</td></tr>
+<tr><td>&rho;_dry</td><td>Sapwood dry density</td><td>边材干密度</td><td>kg/m&sup3;</td></tr>
+<tr><td>D_ax/D_tg</td><td>Thermal anisotropy ratio</td><td>热扩散各向异性比</td><td>&mdash;</td></tr>
+<tr><td>k_sw</td><td>Thermal conductivity</td><td>导热系数</td><td>W/m/K</td></tr>
+<tr><td>&rho;c_sw</td><td>Volumetric heat capacity</td><td>容积热容</td><td>MJ/m&sup3;/K</td></tr>
+<tr><td>D_tg</td><td>Tangential diffusivity</td><td>切向热扩散系数</td><td>m&sup2;/s</td></tr>
+<tr><td>D_ax</td><td>Axial diffusivity</td><td>轴向热扩散系数</td><td>m&sup2;/s</td></tr>
+<tr><td>v_sap</td><td>Sap velocity</td><td>液流速率</td><td>cm/h</td></tr>
+<tr><td>v_th</td><td>Thermal velocity</td><td>热速度</td><td>mm/s</td></tr>
+<tr><td>T_ambient</td><td>Ambient temperature</td><td>环境温度</td><td>&deg;C</td></tr>
+<tr><td>Grid &Delta;</td><td>FD grid spacing</td><td>有限差分网格间距</td><td>mm</td></tr>
+<tr><td>H</td><td>Heater needle</td><td>加热探针</td><td>&mdash;</td></tr>
+<tr><td>T1</td><td>Upper axial sensor</td><td>上游(顺流)测温探针</td><td>&mdash;</td></tr>
+<tr><td>T2</td><td>Lower axial sensor (ref)</td><td>下游(参考)测温探针</td><td>&mdash;</td></tr>
+<tr><td>T3</td><td>Tangential sensor</td><td>侧向测温探针</td><td>&mdash;</td></tr>
+<tr><td>T_H</td><td>Heater temperature</td><td>加热针温度</td><td>&deg;C</td></tr>
+<tr><td>dT_sym</td><td>Symmetric &Delta;T (T1&minus;T2)</td><td>对称温差</td><td>&deg;C</td></tr>
+<tr><td>dT_as</td><td>Asymmetric &Delta;T (T3&minus;T2)</td><td>非对称温差</td><td>&deg;C</td></tr>
+<tr><td>dT_s-a</td><td>dT_sym &minus; dT_as (T1&minus;T3)</td><td>对称减非对称温差</td><td>&deg;C</td></tr>
+<tr><td>K</td><td>K value (zero-flow intercept)</td><td>K值(零流截距)</td><td>&deg;C</td></tr>
+<tr><td>K+dT_s-a</td><td>Corrected difference</td><td>修正温差</td><td>&deg;C</td></tr>
+<tr><td>Ratio</td><td>dT_sym / dT_as</td><td>K图x轴比值</td><td>&mdash;</td></tr>
+<tr><td>c_w</td><td>Water specific heat</td><td>水比热容</td><td>4186 J/kg/K</td></tr>
+<tr><td>&rho;_w</td><td>Water density</td><td>水密度</td><td>1000 kg/m&sup3;</td></tr>
+<tr><td>c_dry</td><td>Dry wood specific heat</td><td>干木比热容</td><td>1200 J/kg/K</td></tr>
+<tr><td>Peak v_sap</td><td>Diurnal peak velocity</td><td>日峰值液流速率</td><td>cm/h</td></tr>
+<tr><td>Peak hour</td><td>Peak time of day</td><td>峰值时刻</td><td>h</td></tr>
+<tr><td>Night min</td><td>Night minimum velocity</td><td>夜间最小液流</td><td>cm/h</td></tr>
+<tr><td>Noise</td><td>Noise level (fraction)</td><td>噪声水平(比例)</td><td>&mdash;</td></tr>
+<tr><td>Speed</td><td>Playback speed multiplier</td><td>回放速度倍率</td><td>&times;</td></tr>
+</table>
+
+<h3 style="color:var(--acc);font-size:14px;margin:18px 0 6px;letter-spacing:.5px">Detailed Descriptions / 详细说明</h3>
+<table>
+<tr><th>Symbol</th><th>Description / 详细含义</th></tr>
+
+<tr><td class="sec" colspan=2>Probe Geometry / 探针几何</td></tr>
+<tr><td>Z_ax</td><td>Axial spacing — 轴向间距：加热探针中心到上游(T1)和下游(T2)测温探针中心的轴向距离，沿树干纵轴方向。HFD 方法中 T1 与 T2 关于 H 对称分布。</td></tr>
+<tr><td>Z_tg</td><td>Tangential spacing — 切向间距：加热探针中心到侧向测温探针(T3)中心的切向距离，垂直于树干轴向和径向。</td></tr>
+
+<tr><td class="sec" colspan=2>Probe Dimensions / 探针尺寸</td></tr>
+<tr><td>Heater L</td><td>Heater probe length — 加热探针长度：加热丝的有效加热段总长度，径向插入树干。直接决定线热源功率密度 q = P / L (W/m)。探针越长，单位长度热量越分散。</td></tr>
+<tr><td>Temp L</td><td>Temperature probe length — 测温探针长度：测温针的有效总长度。测温深度(Meas. depth)不应超过此值。</td></tr>
+<tr><td>Meas. depth</td><td>Measurement depth — 测温深度：温度传感器敏感点距离边材最外表面的径向深度。此参数通过端部效应修正影响模拟：当测温点靠近加热探针两端时，有效热源强度 q 会因三维散热而降低，修正公式为 f = 1 &minus; exp(&minus;d/r₀) &minus; exp(&minus;(L&minus;d)/r₀)，r₀ &asymp; 5 mm。</td></tr>
+
+<tr><td class="sec" colspan=2>Heating / 加热参数</td></tr>
+<tr><td>I</td><td>Current — 加热电流：通过加热探针的恒定直流电流(mA)。HFD 典型值约 50–60 mA。</td></tr>
+<tr><td>R</td><td>Resistance — 加热丝电阻：加热探针内部电阻丝的总电阻(Ω)。</td></tr>
+<tr><td>P</td><td>Power — 加热功率(W)：P = I² &times; R。即焦耳热功率。</td></tr>
+<tr><td>q</td><td>Linear heat flux — 线热源功率密度(W/m)：q = P / L。经端部效应修正后的有效值显示为 "eff"。此值是 2D 有限差分模拟中的源项。</td></tr>
+
+<tr><td class="sec" colspan=2>Sapwood / 边材属性</td></tr>
+<tr><td>&theta;_w</td><td>Water content — 边材体积含水率(m³水/m³边材)：活立木边材典型值 0.30–0.60。含水率越高，导热系数和热容越大。</td></tr>
+<tr><td>&rho;_dry</td><td>Dry density — 边材干密度(kg/m³)：绝干状态下木材密度。针叶树 ~350–550, 阔叶树 ~400–800。</td></tr>
+<tr><td>D_ax/D_tg</td><td>Anisotropy ratio — 热扩散各向异性比：轴向(沿纤维)热扩散系数与切向热扩散系数之比。木材沿纤维方向导热更快，典型值 1.5–2.5。</td></tr>
+<tr><td>k_sw</td><td>Thermal conductivity — 边材导热系数(W/m/K)：由经验公式 k = 0.10 + 0.20&times;G_b + 0.60&times;&theta;_w 计算，其中 G_b = &rho;_dry / &rho;_w。</td></tr>
+<tr><td>&rho;c_sw</td><td>Volumetric heat capacity — 边材容积热容(MJ/m³/K)：&rho;c = &rho;_dry &times; c_dry + &rho;_w &times; c_w &times; &theta;_w。</td></tr>
+<tr><td>D_tg</td><td>Tangential thermal diffusivity — 切向热扩散系数(m²/s)：D = k / (&rho;c)。决定热量在切向方向的扩散速度。</td></tr>
+<tr><td>D_ax</td><td>Axial thermal diffusivity — 轴向热扩散系数(m²/s)：D_ax = D_tg &times; (D_ax/D_tg)。决定热量沿树干轴向的扩散速度。</td></tr>
+
+<tr><td class="sec" colspan=2>Sap Flow / 液流参数</td></tr>
+<tr><td>v_sap</td><td>Sap velocity — 液流速率(cm/h)：边材中树液沿轴向的体积流速。正值=向上(蒸腾拉力)，负值=反向流(夜间根压或温度梯度驱动)。</td></tr>
+<tr><td>v_th</td><td>Thermal velocity — 热速度(mm/s)：v_th = (&rho;_w &times; c_w / &rho;c_sw) &times; v_sap。描述液流对热场的对流传输效应，是有限差分方程中的对流项。</td></tr>
+
+<tr><td class="sec" colspan=2>Environment / 环境</td></tr>
+<tr><td>T_ambient</td><td>Ambient temperature — 环境温度(°C)：模拟域的边界条件温度(Dirichlet)。不影响温差结果，但影响绝对温度显示。</td></tr>
+<tr><td>Grid &Delta;</td><td>Grid spacing — 网格间距(mm)：有限差分方法的空间步长。越小精度越高但计算越慢。时间步长 dt 由 CFL 条件自动确定。</td></tr>
+
+<tr><td class="sec" colspan=2>Probe Positions / 探针位置</td></tr>
+<tr><td>H</td><td>Heater — 加热探针：位于 2D 网格中心，是线热源所在位置。</td></tr>
+<tr><td>T1</td><td>Upper axial (downstream) — 上游测温探针：位于 H 轴向上方 +Z_ax 处。在液流方向上为顺流位置，液流带走热量使其升温。</td></tr>
+<tr><td>T2</td><td>Lower axial (reference) — 下游测温探针：位于 H 轴向下方 &minus;Z_ax 处。作为参考探针，液流从此处带走热量使其降温。</td></tr>
+<tr><td>T3</td><td>Tangential — 侧向测温探针：位于 H 切向 +Z_tg 处。不在液流轴向路径上，温度主要受热传导影响。</td></tr>
+
+<tr><td class="sec" colspan=2>HFD Temperature Differences / HFD 温差</td></tr>
+<tr><td>dT_sym</td><td>Symmetric &Delta;T — 对称温差：dT_sym = T1 &minus; T2。零流量时 dT_sym &asymp; 0；有液流时，T1 升高、T2 降低，dT_sym 增大。是液流的主要指标。</td></tr>
+<tr><td>dT_as</td><td>Asymmetric &Delta;T — 非对称温差：dT_as = T3 &minus; T2。综合反映切向传导和轴向对流效应。</td></tr>
+<tr><td>dT_s-a</td><td>Sym minus Asym — 对称减非对称：dT_s-a = dT_sym &minus; dT_as = T1 &minus; T3。消除 T2 参考点的影响。</td></tr>
+<tr><td>K</td><td>K value — K 值(Nadezhdina 方法)：通过低流量时段的 dT_as 对 Ratio 的回归，外推到 Ratio=0 时的 dT_as 截距。代表零液流条件下的自然温度梯度贡献，用于校正。</td></tr>
+<tr><td>K+dT_s-a</td><td>Corrected difference — 修正温差：K + (T1 &minus; T3)。在 K-diagram 中，K+dT_s-a 线在零流量处应与 dT_as 线相交于 K 值。</td></tr>
+<tr><td>Ratio</td><td>dT_sym / dT_as — K-diagram 的横轴。Ratio &asymp; 0 表示接近零流量；Ratio 较大表示强液流。</td></tr>
+
+<tr><td class="sec" colspan=2>Diurnal Simulation / 日变化模拟</td></tr>
+<tr><td>Peak v_sap</td><td>Peak sap velocity — 日最大液流速率(cm/h)：日变化曲线的峰值，通常在中午前后达到。</td></tr>
+<tr><td>Peak hour</td><td>Peak time — 液流峰值时刻(h)：一天中液流速率最高的时间，受光照和 VPD 影响，典型 12:00–15:00。</td></tr>
+<tr><td>Night min</td><td>Night minimum velocity — 夜间最小液流速率(cm/h)：夜间基准值。可为负值，模拟反向流(如根压驱动的向下流动)。</td></tr>
+<tr><td>Noise</td><td>Noise level — 噪声水平：以峰值液流为比例的随机扰动幅度(0–0.15)。模拟实际测量中的信号噪声。</td></tr>
+<tr><td>Speed</td><td>Playback speed — 回放速度倍率：加速日变化播放，每步跳过的数据点数。</td></tr>
+
+<tr><td class="sec" colspan=2>Internal Constants / 内部常量</td></tr>
+<tr><td>c_w</td><td>Specific heat of water — 水的比热容 = 4186 J/(kg&middot;K)。用于计算边材热容和热速度。</td></tr>
+<tr><td>&rho;_w</td><td>Density of water — 水密度 = 1000 kg/m³。用于计算含水率相关的热物性。</td></tr>
+<tr><td>c_dry</td><td>Specific heat of dry wood — 干燥木材比热容 = 1200 J/(kg&middot;K)。用于计算边材热容。</td></tr>
+</table>
+</div>
+</div>
+
+</body></html>
