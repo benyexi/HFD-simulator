@@ -36,8 +36,10 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 .modal table{width:100%;border-collapse:collapse;font-size:14px}
 .modal th{text-align:left;color:var(--acc);padding:6px 8px;border-bottom:1px solid var(--brd);font-size:12px;text-transform:uppercase;letter-spacing:.8px}
 .modal td{padding:5px 8px;border-bottom:1px solid rgba(30,41,59,.5);vertical-align:top}
-.modal td:first-child{color:var(--txt);font-weight:600;white-space:nowrap;width:130px}
+.modal td:first-child{color:var(--txt);font-weight:600;white-space:nowrap;min-width:100px}
 .modal td:nth-child(2){color:var(--dim)}
+.modal td:nth-child(3){color:var(--txt)}
+.modal td:nth-child(4){color:var(--dim);white-space:nowrap;text-align:right}
 .modal .sec{color:var(--acc);font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:12px 8px 4px;border:none}
 .bt.help{background:transparent;border:1px solid var(--brd);color:var(--dim);padding:5px 12px;font-size:14px}
 </style></head><body>
@@ -557,66 +559,112 @@ updUI();P=gP();resizeCanvas();solveSS(P);render(P);
 <h2>Variable Glossary / 变量说明</h2>
 <button class="bt s" onclick="$('glossary').classList.remove('open')" style="padding:4px 12px">✕</button>
 </div>
+
+<h3 style="color:var(--acc);font-size:14px;margin:10px 0 6px;letter-spacing:.5px">Quick Reference / 速查表</h3>
 <table>
-<tr><th>Symbol</th><th>Full Name / 含义</th></tr>
+<tr><th>Symbol</th><th>Name</th><th>中文名</th><th>Unit</th></tr>
+<tr><td>Z_ax</td><td>Axial spacing</td><td>轴向间距</td><td>mm</td></tr>
+<tr><td>Z_tg</td><td>Tangential spacing</td><td>切向间距</td><td>mm</td></tr>
+<tr><td>Heater L</td><td>Heater probe length</td><td>加热探针长度</td><td>mm</td></tr>
+<tr><td>Temp L</td><td>Temperature probe length</td><td>测温探针长度</td><td>mm</td></tr>
+<tr><td>Meas. depth</td><td>Measurement depth</td><td>测温点深度(距边材外表面)</td><td>mm</td></tr>
+<tr><td>I</td><td>Heating current</td><td>加热电流</td><td>mA</td></tr>
+<tr><td>R</td><td>Heater resistance</td><td>加热丝电阻</td><td>&Omega;</td></tr>
+<tr><td>P</td><td>Heating power (I&sup2;R)</td><td>加热功率</td><td>W</td></tr>
+<tr><td>q</td><td>Linear heat flux (P/L)</td><td>线热源功率密度</td><td>W/m</td></tr>
+<tr><td>&theta;_w</td><td>Sapwood water content</td><td>边材体积含水率</td><td>m&sup3;/m&sup3;</td></tr>
+<tr><td>&rho;_dry</td><td>Sapwood dry density</td><td>边材干密度</td><td>kg/m&sup3;</td></tr>
+<tr><td>D_ax/D_tg</td><td>Thermal anisotropy ratio</td><td>热扩散各向异性比</td><td>&mdash;</td></tr>
+<tr><td>k_sw</td><td>Thermal conductivity</td><td>导热系数</td><td>W/m/K</td></tr>
+<tr><td>&rho;c_sw</td><td>Volumetric heat capacity</td><td>容积热容</td><td>MJ/m&sup3;/K</td></tr>
+<tr><td>D_tg</td><td>Tangential diffusivity</td><td>切向热扩散系数</td><td>m&sup2;/s</td></tr>
+<tr><td>D_ax</td><td>Axial diffusivity</td><td>轴向热扩散系数</td><td>m&sup2;/s</td></tr>
+<tr><td>v_sap</td><td>Sap velocity</td><td>液流速率</td><td>cm/h</td></tr>
+<tr><td>v_th</td><td>Thermal velocity</td><td>热速度</td><td>mm/s</td></tr>
+<tr><td>T_ambient</td><td>Ambient temperature</td><td>环境温度</td><td>&deg;C</td></tr>
+<tr><td>Grid &Delta;</td><td>FD grid spacing</td><td>有限差分网格间距</td><td>mm</td></tr>
+<tr><td>H</td><td>Heater needle</td><td>加热探针</td><td>&mdash;</td></tr>
+<tr><td>T1</td><td>Upper axial sensor</td><td>上游(顺流)测温探针</td><td>&mdash;</td></tr>
+<tr><td>T2</td><td>Lower axial sensor (ref)</td><td>下游(参考)测温探针</td><td>&mdash;</td></tr>
+<tr><td>T3</td><td>Tangential sensor</td><td>侧向测温探针</td><td>&mdash;</td></tr>
+<tr><td>T_H</td><td>Heater temperature</td><td>加热针温度</td><td>&deg;C</td></tr>
+<tr><td>dT_sym</td><td>Symmetric &Delta;T (T1&minus;T2)</td><td>对称温差</td><td>&deg;C</td></tr>
+<tr><td>dT_as</td><td>Asymmetric &Delta;T (T3&minus;T2)</td><td>非对称温差</td><td>&deg;C</td></tr>
+<tr><td>dT_s-a</td><td>dT_sym &minus; dT_as (T1&minus;T3)</td><td>对称减非对称温差</td><td>&deg;C</td></tr>
+<tr><td>K</td><td>K value (zero-flow intercept)</td><td>K值(零流截距)</td><td>&deg;C</td></tr>
+<tr><td>K+dT_s-a</td><td>Corrected difference</td><td>修正温差</td><td>&deg;C</td></tr>
+<tr><td>Ratio</td><td>dT_sym / dT_as</td><td>K图x轴比值</td><td>&mdash;</td></tr>
+<tr><td>c_w</td><td>Water specific heat</td><td>水比热容</td><td>4186 J/kg/K</td></tr>
+<tr><td>&rho;_w</td><td>Water density</td><td>水密度</td><td>1000 kg/m&sup3;</td></tr>
+<tr><td>c_dry</td><td>Dry wood specific heat</td><td>干木比热容</td><td>1200 J/kg/K</td></tr>
+<tr><td>Peak v_sap</td><td>Diurnal peak velocity</td><td>日峰值液流速率</td><td>cm/h</td></tr>
+<tr><td>Peak hour</td><td>Peak time of day</td><td>峰值时刻</td><td>h</td></tr>
+<tr><td>Night min</td><td>Night minimum velocity</td><td>夜间最小液流</td><td>cm/h</td></tr>
+<tr><td>Noise</td><td>Noise level (fraction)</td><td>噪声水平(比例)</td><td>&mdash;</td></tr>
+<tr><td>Speed</td><td>Playback speed multiplier</td><td>回放速度倍率</td><td>&times;</td></tr>
+</table>
+
+<h3 style="color:var(--acc);font-size:14px;margin:18px 0 6px;letter-spacing:.5px">Detailed Descriptions / 详细说明</h3>
+<table>
+<tr><th>Symbol</th><th>Description / 详细含义</th></tr>
 
 <tr><td class="sec" colspan=2>Probe Geometry / 探针几何</td></tr>
-<tr><td>Z_ax</td><td>Axial spacing — 轴向间距：加热探针与上下游测温探针之间的轴向距离 (mm)</td></tr>
-<tr><td>Z_tg</td><td>Tangential spacing — 切向间距：加热探针与侧向测温探针之间的切向距离 (mm)</td></tr>
+<tr><td>Z_ax</td><td>Axial spacing — 轴向间距：加热探针中心到上游(T1)和下游(T2)测温探针中心的轴向距离，沿树干纵轴方向。HFD 方法中 T1 与 T2 关于 H 对称分布。</td></tr>
+<tr><td>Z_tg</td><td>Tangential spacing — 切向间距：加热探针中心到侧向测温探针(T3)中心的切向距离，垂直于树干轴向和径向。</td></tr>
 
 <tr><td class="sec" colspan=2>Probe Dimensions / 探针尺寸</td></tr>
-<tr><td>Heater L</td><td>Heater probe length — 加热探针长度：加热针的有效加热段总长 (mm)，决定线热源功率密度 q=P/L</td></tr>
-<tr><td>Temp L</td><td>Temperature probe length — 测温探针长度：测温针的总有效长度 (mm)</td></tr>
-<tr><td>Meas. depth</td><td>Measurement depth — 测温深度：测温点距离边材最外表面的径向深度 (mm)，影响端部效应修正</td></tr>
+<tr><td>Heater L</td><td>Heater probe length — 加热探针长度：加热丝的有效加热段总长度，径向插入树干。直接决定线热源功率密度 q = P / L (W/m)。探针越长，单位长度热量越分散。</td></tr>
+<tr><td>Temp L</td><td>Temperature probe length — 测温探针长度：测温针的有效总长度。测温深度(Meas. depth)不应超过此值。</td></tr>
+<tr><td>Meas. depth</td><td>Measurement depth — 测温深度：温度传感器敏感点距离边材最外表面的径向深度。此参数通过端部效应修正影响模拟：当测温点靠近加热探针两端时，有效热源强度 q 会因三维散热而降低，修正公式为 f = 1 &minus; exp(&minus;d/r₀) &minus; exp(&minus;(L&minus;d)/r₀)，r₀ &asymp; 5 mm。</td></tr>
 
 <tr><td class="sec" colspan=2>Heating / 加热参数</td></tr>
-<tr><td>I</td><td>Current — 加热电流 (mA)，通过加热探针的恒定直流电流</td></tr>
-<tr><td>R</td><td>Resistance — 加热探针电阻 (Ω)，加热丝总电阻</td></tr>
-<tr><td>P</td><td>Power — 加热功率 (W)，P = I² × R</td></tr>
-<tr><td>q</td><td>Linear heat flux — 线热源功率密度 (W/m)，q = P / L，经端部效应修正后为有效 q</td></tr>
+<tr><td>I</td><td>Current — 加热电流：通过加热探针的恒定直流电流(mA)。HFD 典型值约 50–60 mA。</td></tr>
+<tr><td>R</td><td>Resistance — 加热丝电阻：加热探针内部电阻丝的总电阻(Ω)。</td></tr>
+<tr><td>P</td><td>Power — 加热功率(W)：P = I² &times; R。即焦耳热功率。</td></tr>
+<tr><td>q</td><td>Linear heat flux — 线热源功率密度(W/m)：q = P / L。经端部效应修正后的有效值显示为 "eff"。此值是 2D 有限差分模拟中的源项。</td></tr>
 
 <tr><td class="sec" colspan=2>Sapwood / 边材属性</td></tr>
-<tr><td>θ_w</td><td>Water content — 边材体积含水率 (m³/m³)，即单位体积边材中水的体积比</td></tr>
-<tr><td>ρ_dry</td><td>Dry density — 边材干密度 (kg/m³)，绝干状态下的木材密度</td></tr>
-<tr><td>D_ax/D_tg</td><td>Anisotropy ratio — 各向异性比：轴向热扩散系数与切向热扩散系数之比</td></tr>
-<tr><td>k_sw</td><td>Thermal conductivity — 边材导热系数 (W/m/K)，由含水率和密度计算</td></tr>
-<tr><td>ρc_sw</td><td>Volumetric heat capacity — 边材容积热容 (MJ/m³/K)</td></tr>
-<tr><td>D_tg</td><td>Tangential thermal diffusivity — 切向热扩散系数 (m²/s)，D = k / (ρc)</td></tr>
-<tr><td>D_ax</td><td>Axial thermal diffusivity — 轴向热扩散系数 (m²/s)，D_ax = D_tg × anisotropy</td></tr>
+<tr><td>&theta;_w</td><td>Water content — 边材体积含水率(m³水/m³边材)：活立木边材典型值 0.30–0.60。含水率越高，导热系数和热容越大。</td></tr>
+<tr><td>&rho;_dry</td><td>Dry density — 边材干密度(kg/m³)：绝干状态下木材密度。针叶树 ~350–550, 阔叶树 ~400–800。</td></tr>
+<tr><td>D_ax/D_tg</td><td>Anisotropy ratio — 热扩散各向异性比：轴向(沿纤维)热扩散系数与切向热扩散系数之比。木材沿纤维方向导热更快，典型值 1.5–2.5。</td></tr>
+<tr><td>k_sw</td><td>Thermal conductivity — 边材导热系数(W/m/K)：由经验公式 k = 0.10 + 0.20&times;G_b + 0.60&times;&theta;_w 计算，其中 G_b = &rho;_dry / &rho;_w。</td></tr>
+<tr><td>&rho;c_sw</td><td>Volumetric heat capacity — 边材容积热容(MJ/m³/K)：&rho;c = &rho;_dry &times; c_dry + &rho;_w &times; c_w &times; &theta;_w。</td></tr>
+<tr><td>D_tg</td><td>Tangential thermal diffusivity — 切向热扩散系数(m²/s)：D = k / (&rho;c)。决定热量在切向方向的扩散速度。</td></tr>
+<tr><td>D_ax</td><td>Axial thermal diffusivity — 轴向热扩散系数(m²/s)：D_ax = D_tg &times; (D_ax/D_tg)。决定热量沿树干轴向的扩散速度。</td></tr>
 
 <tr><td class="sec" colspan=2>Sap Flow / 液流参数</td></tr>
-<tr><td>v_sap</td><td>Sap velocity — 液流速率 (cm/h)，边材中树液沿轴向的流速</td></tr>
-<tr><td>v_th</td><td>Thermal velocity — 热速度 (mm/s)，v_th = (ρ_w c_w / ρc_sw) × v_sap</td></tr>
+<tr><td>v_sap</td><td>Sap velocity — 液流速率(cm/h)：边材中树液沿轴向的体积流速。正值=向上(蒸腾拉力)，负值=反向流(夜间根压或温度梯度驱动)。</td></tr>
+<tr><td>v_th</td><td>Thermal velocity — 热速度(mm/s)：v_th = (&rho;_w &times; c_w / &rho;c_sw) &times; v_sap。描述液流对热场的对流传输效应，是有限差分方程中的对流项。</td></tr>
 
 <tr><td class="sec" colspan=2>Environment / 环境</td></tr>
-<tr><td>T_ambient</td><td>Ambient temperature — 环境温度 (°C)，边界条件温度</td></tr>
-<tr><td>Grid Δ</td><td>Grid spacing — 网格间距 (mm)，有限差分空间步长</td></tr>
+<tr><td>T_ambient</td><td>Ambient temperature — 环境温度(°C)：模拟域的边界条件温度(Dirichlet)。不影响温差结果，但影响绝对温度显示。</td></tr>
+<tr><td>Grid &Delta;</td><td>Grid spacing — 网格间距(mm)：有限差分方法的空间步长。越小精度越高但计算越慢。时间步长 dt 由 CFL 条件自动确定。</td></tr>
 
 <tr><td class="sec" colspan=2>Probe Positions / 探针位置</td></tr>
-<tr><td>H</td><td>Heater — 加热探针，位于网格中心</td></tr>
-<tr><td>T1</td><td>Upper axial — 上游测温探针 (downstream)，位于加热针轴向上方 +Z_ax 处</td></tr>
-<tr><td>T2</td><td>Lower axial — 下游测温探针 (reference)，位于加热针轴向下方 −Z_ax 处</td></tr>
-<tr><td>T3</td><td>Tangential — 侧向测温探针，位于加热针切向 +Z_tg 处</td></tr>
+<tr><td>H</td><td>Heater — 加热探针：位于 2D 网格中心，是线热源所在位置。</td></tr>
+<tr><td>T1</td><td>Upper axial (downstream) — 上游测温探针：位于 H 轴向上方 +Z_ax 处。在液流方向上为顺流位置，液流带走热量使其升温。</td></tr>
+<tr><td>T2</td><td>Lower axial (reference) — 下游测温探针：位于 H 轴向下方 &minus;Z_ax 处。作为参考探针，液流从此处带走热量使其降温。</td></tr>
+<tr><td>T3</td><td>Tangential — 侧向测温探针：位于 H 切向 +Z_tg 处。不在液流轴向路径上，温度主要受热传导影响。</td></tr>
 
 <tr><td class="sec" colspan=2>HFD Temperature Differences / HFD 温差</td></tr>
-<tr><td>dT_sym</td><td>Symmetric temperature difference — 对称温差：dT_sym = T1 − T2，反映轴向热场不对称性</td></tr>
-<tr><td>dT_as</td><td>Asymmetric temperature difference — 非对称温差：dT_as = T3 − T2，切向与轴向参考温差</td></tr>
-<tr><td>dT_s-a</td><td>Sym minus Asym — 对称减非对称：dT_s-a = dT_sym − dT_as = T1 − T3</td></tr>
-<tr><td>K</td><td>K value (Nadezhdina) — K 值：零流量时的 dT_as 截距，用于区分液流与自然温度梯度</td></tr>
-<tr><td>K + dT_s-a</td><td>Corrected difference — 修正温差：K + (T1 − T3)，用于 K-diagram 分析</td></tr>
-<tr><td>Ratio</td><td>dT_sym / dT_as — K-diagram 的 x 轴，反映液流对热场的影响强度</td></tr>
+<tr><td>dT_sym</td><td>Symmetric &Delta;T — 对称温差：dT_sym = T1 &minus; T2。零流量时 dT_sym &asymp; 0；有液流时，T1 升高、T2 降低，dT_sym 增大。是液流的主要指标。</td></tr>
+<tr><td>dT_as</td><td>Asymmetric &Delta;T — 非对称温差：dT_as = T3 &minus; T2。综合反映切向传导和轴向对流效应。</td></tr>
+<tr><td>dT_s-a</td><td>Sym minus Asym — 对称减非对称：dT_s-a = dT_sym &minus; dT_as = T1 &minus; T3。消除 T2 参考点的影响。</td></tr>
+<tr><td>K</td><td>K value — K 值(Nadezhdina 方法)：通过低流量时段的 dT_as 对 Ratio 的回归，外推到 Ratio=0 时的 dT_as 截距。代表零液流条件下的自然温度梯度贡献，用于校正。</td></tr>
+<tr><td>K+dT_s-a</td><td>Corrected difference — 修正温差：K + (T1 &minus; T3)。在 K-diagram 中，K+dT_s-a 线在零流量处应与 dT_as 线相交于 K 值。</td></tr>
+<tr><td>Ratio</td><td>dT_sym / dT_as — K-diagram 的横轴。Ratio &asymp; 0 表示接近零流量；Ratio 较大表示强液流。</td></tr>
 
 <tr><td class="sec" colspan=2>Diurnal Simulation / 日变化模拟</td></tr>
-<tr><td>Peak v_sap</td><td>Peak sap velocity — 日最大液流速率 (cm/h)</td></tr>
-<tr><td>Peak hour</td><td>Peak time — 液流峰值时刻 (h)，通常在 12:00–15:00</td></tr>
-<tr><td>Night min</td><td>Night minimum velocity — 夜间最小液流速率 (cm/h)，可为负值（反向流）</td></tr>
-<tr><td>Noise</td><td>Noise level — 噪声水平：以峰值速率为比例的随机扰动幅度</td></tr>
-<tr><td>Speed</td><td>Playback speed — 回放速度倍率</td></tr>
+<tr><td>Peak v_sap</td><td>Peak sap velocity — 日最大液流速率(cm/h)：日变化曲线的峰值，通常在中午前后达到。</td></tr>
+<tr><td>Peak hour</td><td>Peak time — 液流峰值时刻(h)：一天中液流速率最高的时间，受光照和 VPD 影响，典型 12:00–15:00。</td></tr>
+<tr><td>Night min</td><td>Night minimum velocity — 夜间最小液流速率(cm/h)：夜间基准值。可为负值，模拟反向流(如根压驱动的向下流动)。</td></tr>
+<tr><td>Noise</td><td>Noise level — 噪声水平：以峰值液流为比例的随机扰动幅度(0–0.15)。模拟实际测量中的信号噪声。</td></tr>
+<tr><td>Speed</td><td>Playback speed — 回放速度倍率：加速日变化播放，每步跳过的数据点数。</td></tr>
 
 <tr><td class="sec" colspan=2>Internal Constants / 内部常量</td></tr>
-<tr><td>c_w</td><td>Specific heat of water — 水比热容 = 4186 J/(kg·K)</td></tr>
-<tr><td>ρ_w</td><td>Density of water — 水密度 = 1000 kg/m³</td></tr>
-<tr><td>c_dry</td><td>Specific heat of dry wood — 干木比热容 = 1200 J/(kg·K)</td></tr>
+<tr><td>c_w</td><td>Specific heat of water — 水的比热容 = 4186 J/(kg&middot;K)。用于计算边材热容和热速度。</td></tr>
+<tr><td>&rho;_w</td><td>Density of water — 水密度 = 1000 kg/m³。用于计算含水率相关的热物性。</td></tr>
+<tr><td>c_dry</td><td>Specific heat of dry wood — 干燥木材比热容 = 1200 J/(kg&middot;K)。用于计算边材热容。</td></tr>
 </table>
 </div>
 </div>
