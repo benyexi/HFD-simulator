@@ -325,12 +325,18 @@ function drawKD(ci){
   if(Kval!==null){cx.strokeStyle='rgba(200,0,0,0.55)';cx.lineWidth=1.5;cx.setLineDash([6,4]);
     cx.beginPath();cx.moveTo(ml,toY(Kval));cx.lineTo(ml+pw,toY(Kval));cx.stroke();cx.setLineDash([]);
     cx.fillStyle='#c00';cx.font='bold 14px JetBrains Mono';cx.textAlign='left';cx.fillText('K='+Kval.toFixed(2)+'°C',ml+6,toY(Kval)-8)}
-  // Pe annotation (yellow triangle)
-  {const p=gP();const Pe=Math.abs(p.vth)*(p.zax/1000)/p.Dax;
-    const px=ml+pw-158,py=mt+14;const ts=8;
-    cx.beginPath();cx.moveTo(px,py-ts);cx.lineTo(px-ts*0.866,py+ts*0.5);cx.lineTo(px+ts*0.866,py+ts*0.5);cx.closePath();
-    cx.fillStyle='#d4a017';cx.fill();cx.strokeStyle='#8B7000';cx.lineWidth=1.2;cx.stroke();
-    cx.fillStyle='#8B7000';cx.font='bold 14px JetBrains Mono';cx.textAlign='left';cx.fillText('Pe = '+Pe.toFixed(2),px+ts+6,py+5)}
+  // Pe=0 marker: find data point closest to zero flow and mark with large yellow triangle
+  {let minV=Infinity,pe0Idx=-1;
+    for(let i=0;i<tsH.length;i++){if(Math.abs(tsH[i].v)<minV){minV=Math.abs(tsH[i].v);pe0Idx=i}}
+    if(pe0Idx>=0){const t=tsH[pe0Idx],ts=10;
+      // draw triangle at each series value for the Pe≈0 point (on dT_as which is the key HFD reference)
+      const tx=toX(t.ratio),ty=toY(t.da);
+      cx.beginPath();cx.moveTo(tx,ty-ts);cx.lineTo(tx-ts*0.866,ty+ts*0.5);cx.lineTo(tx+ts*0.866,ty+ts*0.5);cx.closePath();
+      cx.fillStyle='#d4a017';cx.fill();cx.strokeStyle='#000';cx.lineWidth=2;cx.stroke();
+      // label
+      cx.fillStyle='#8B7000';cx.font='bold 13px JetBrains Mono';cx.textAlign='left';
+      cx.fillText('Pe≈0 (v='+t.v.toFixed(1)+')',tx+ts+4,ty+4)}
+  }
   // axes
   cx.strokeStyle='#333';cx.lineWidth=1;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
   cx.fillStyle='#333';cx.font='14px JetBrains Mono';
@@ -350,7 +356,7 @@ function drawKD(ci){
   // Pe legend entry (yellow triangle)
   {const iy=ly+16+4*18;const ts=5;
     cx.beginPath();cx.moveTo(lx+12,iy-ts);cx.lineTo(lx+12-ts*0.866,iy+ts*0.5);cx.lineTo(lx+12+ts*0.866,iy+ts*0.5);cx.closePath();
-    cx.fillStyle='#d4a017';cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText('Pe (Péclet)',lx+24,iy+5)}
+    cx.fillStyle='#d4a017';cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText('Pe≈0',lx+24,iy+5)}
 }
 function nS(r){const l=Math.floor(Math.log10(r));const p=Math.pow(10,l);if(r/p<2)return p*.2;if(r/p<5)return p*.5;return p}
 
