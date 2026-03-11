@@ -5,11 +5,11 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Source+Serif+4:wght@400;600;700&display=swap');
 :root{--bg:#0a0e17;--pnl:#111827;--brd:#1e293b;--txt:#e2e8f0;--dim:#64748b;--acc:#f59e0b}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);min-height:100vh}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden}
 .hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px}
 .hd h1{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:var(--acc)}
 .hd .sub{font-size:12px;color:var(--dim)}
-.main{display:grid;grid-template-columns:320px 1fr 480px;min-height:calc(100vh - 54px)}
+.main{display:grid;grid-template-columns:320px 1fr 480px;height:calc(100vh - 54px)}
 .pnl{padding:14px 16px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
 .pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}
 .st{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
@@ -65,14 +65,14 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 
 <!-- CENTER -->
-<div class="cv">
+<div class="cv" id="cvWrap">
 <div style="display:flex;align-items:flex-start;gap:8px">
-<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:12px;color:var(--dim);display:flex;align-items:center;height:680px">↑ axial (stem upward, sap flow) mm</div>
-<div><canvas id=hC width=680 height=680 style="border:1px solid var(--brd)"></canvas>
+<div id="yLabel" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:12px;color:var(--dim);display:flex;align-items:center">↑ axial (stem upward, sap flow) mm</div>
+<div><canvas id=hC style="border:1px solid var(--brd)"></canvas>
 <div style="text-align:center;font-size:12px;color:var(--dim);margin-top:4px">← tangential (mm) →</div></div>
 <div style="display:flex;align-items:stretch;gap:4px">
-<canvas id=cbar width=22 height=300 style="border:1px solid var(--brd)"></canvas>
-<div style="display:flex;flex-direction:column;justify-content:space-between;height:300px;font-size:10px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:9px">°C</span><span id=cbMn>0</span></div>
+<canvas id=cbar width=22 style="border:1px solid var(--brd)"></canvas>
+<div id="cbLabels" style="display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:9px">°C</span><span id=cbMn>0</span></div>
 </div></div>
 <div class="sts" id=sB>Ready</div>
 </div>
@@ -315,8 +315,24 @@ function drawTS(){
   cx.fillStyle='#2a2';cx.textAlign='left';cx.fillText(Math.round(vmx)+'cm/h',ml+pw+2,mt+9);
 }
 
+// ============ DYNAMIC CANVAS SIZING ============
+const hc=$('hC'),cbc=$('cbar');
+let hctx=hc.getContext('2d'),cbctx=cbc.getContext('2d');
+function resizeCanvas(){
+  const wrap=$('cvWrap');
+  const avH=wrap.clientHeight-40; // padding + x-axis label
+  const avW=wrap.clientWidth-70; // y-label + colorbar
+  const sz=Math.max(200,Math.min(avW,avH));
+  hc.width=sz;hc.height=sz;hc.style.width=sz+'px';hc.style.height=sz+'px';
+  $('yLabel').style.height=sz+'px';
+  const cbH=Math.round(sz*0.45);
+  cbc.height=cbH;cbc.style.height=cbH+'px';
+  $('cbLabels').style.height=cbH+'px';
+  if(G&&G.length)render(P);
+}
+window.addEventListener('resize',resizeCanvas);
+
 // ============ HEAT FIELD RENDER (jet colormap) ============
-const hc=$('hC'),hctx=hc.getContext('2d'),cbc=$('cbar'),cbctx=cbc.getContext('2d');
 function jet(t){t=Math.max(0,Math.min(1,t));let r,g,b;
   if(t<.125){r=0;g=0;b=128+t/.125*127}
   else if(t<.375){const s=(t-.125)/.25;r=0;g=s*255;b=255}
@@ -355,7 +371,7 @@ function render(p){
     hctx.beginPath();hctx.moveTo(30,45+dir*20);hctx.lineTo(30,45-dir*15);hctx.stroke();
     hctx.beginPath();hctx.moveTo(30,45-dir*15);hctx.lineTo(24,45-dir*5);hctx.moveTo(30,45-dir*15);hctx.lineTo(36,45-dir*5);hctx.stroke();
     hctx.font='13px JetBrains Mono';hctx.fillText((p.vcmh>0?'↑':'↓')+' '+Math.abs(p.vcmh)+' cm/h',6,80);hctx.restore()}
-  for(let py=0;py<300;py++){const t=1-py/300;const[r,g,b]=jet(t);cbctx.fillStyle=`rgb(${r},${g},${b})`;cbctx.fillRect(0,py,22,1)}
+  const cbH=cbc.height;for(let py=0;py<cbH;py++){const t=1-py/cbH;const[r,g,b]=jet(t);cbctx.fillStyle=`rgb(${r},${g},${b})`;cbctx.fillRect(0,py,22,1)}
   $('cbMx').textContent='+'+md.toFixed(1)+'°C';$('cbMn').textContent='0';
   updR(p);
 }
@@ -402,5 +418,5 @@ hc.addEventListener('mousemove',e=>{
   const gi=Math.floor(px/(hc.width/NX)),gj=NY-1-Math.floor(py/(hc.height/NY));
   if(gi>=0&&gi<NX&&gj>=0&&gj<NY){const T=G[gi*NY+gj],xm=(gi-Math.floor(NX/2))*P.dx*1000,ym=(gj-Math.floor(NY/2))*P.dx*1000;
     $('o_m').innerHTML='('+xm.toFixed(1)+','+ym.toFixed(1)+')mm <span style="color:var(--acc)">'+T.toFixed(2)+'°C</span> ΔT='+(T-P.Ta).toFixed(2)}});
-updUI();P=gP();solveSS(P);render(P);
+updUI();P=gP();resizeCanvas();solveSS(P);render(P);
 </script></body></html>
