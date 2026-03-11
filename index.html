@@ -116,10 +116,11 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 <div class="nf"><b>dTsym=T1−T2</b> · <b>dTas=T3−T2</b> · <b>dTs-a=T1−T3</b></div>
 <div class="st">Sapwood Thermal Properties</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px">
 <div class="rd"><div class="rt">k<sub>sw</sub> (W/m/K)</div><div class="rv" id="o_k">—</div></div>
 <div class="rd"><div class="rt">ρc<sub>sw</sub> (MJ/m³/K)</div><div class="rv" id="o_rc">—</div></div>
 <div class="rd"><div class="rt">v<sub>th</sub> (mm/s)</div><div class="rv" id="o_vt">—</div></div>
+<div class="rd"><div class="rt" style="color:#d4a017">Pe</div><div class="rv" id="o_pe" style="color:#d4a017">—</div></div>
 </div>
 <div class="st">Needle Temperatures (°C)</div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px">
@@ -324,6 +325,12 @@ function drawKD(ci){
   if(Kval!==null){cx.strokeStyle='rgba(200,0,0,0.55)';cx.lineWidth=1.5;cx.setLineDash([6,4]);
     cx.beginPath();cx.moveTo(ml,toY(Kval));cx.lineTo(ml+pw,toY(Kval));cx.stroke();cx.setLineDash([]);
     cx.fillStyle='#c00';cx.font='bold 14px JetBrains Mono';cx.textAlign='left';cx.fillText('K='+Kval.toFixed(2)+'°C',ml+6,toY(Kval)-8)}
+  // Pe annotation (yellow triangle)
+  {const p=gP();const Pe=Math.abs(p.vth)*(p.zax/1000)/p.Dax;
+    const px=ml+pw-158,py=mt+14;const ts=8;
+    cx.beginPath();cx.moveTo(px,py-ts);cx.lineTo(px-ts*0.866,py+ts*0.5);cx.lineTo(px+ts*0.866,py+ts*0.5);cx.closePath();
+    cx.fillStyle='#d4a017';cx.fill();cx.strokeStyle='#8B7000';cx.lineWidth=1.2;cx.stroke();
+    cx.fillStyle='#8B7000';cx.font='bold 14px JetBrains Mono';cx.textAlign='left';cx.fillText('Pe = '+Pe.toFixed(2),px+ts+6,py+5)}
   // axes
   cx.strokeStyle='#333';cx.lineWidth=1;cx.beginPath();cx.moveTo(ml,mt);cx.lineTo(ml,mt+ph);cx.lineTo(ml+pw,mt+ph);cx.stroke();
   cx.fillStyle='#333';cx.font='14px JetBrains Mono';
@@ -334,12 +341,16 @@ function drawKD(ci){
   cx.textAlign='center';const xs=nS(xmx-xmn);
   for(let xv=Math.ceil(xmn/xs)*xs;xv<=xmx;xv+=xs)cx.fillText(xv.toFixed(1),toX(xv),mt+ph+18);
   // LEGEND - positioned at bottom-right inside axes
-  const lx=ml+pw-158,ly=mt+ph-96,lw=150,lh=90;
+  const lx=ml+pw-158,ly=mt+ph-114,lw=150,lh=108;
   cx.fillStyle='rgba(255,255,255,0.95)';cx.strokeStyle='#ccc';cx.lineWidth=.7;
   cx.fillRect(lx,ly,lw,lh);cx.strokeRect(lx,ly,lw,lh);
   const items=[['#222','dTsym'],['#e91e90','dTas'],['#aaa','dTs-a'],['#5a8a20','K+dTs-a']];
   cx.font='13px JetBrains Mono';
   items.forEach(([col,label],i)=>{const iy=ly+16+i*18;cx.fillStyle=col;cx.beginPath();cx.arc(lx+12,iy,5,0,Math.PI*2);cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText(label,lx+24,iy+5)});
+  // Pe legend entry (yellow triangle)
+  {const iy=ly+16+4*18;const ts=5;
+    cx.beginPath();cx.moveTo(lx+12,iy-ts);cx.lineTo(lx+12-ts*0.866,iy+ts*0.5);cx.lineTo(lx+12+ts*0.866,iy+ts*0.5);cx.closePath();
+    cx.fillStyle='#d4a017';cx.fill();cx.fillStyle='#333';cx.textAlign='left';cx.fillText('Pe (Péclet)',lx+24,iy+5)}
 }
 function nS(r){const l=Math.floor(Math.log10(r));const p=Math.pow(10,l);if(r/p<2)return p*.2;if(r/p<5)return p*.5;return p}
 
@@ -451,6 +462,7 @@ function updR(p){
   const hfd=getHFD(p);
   $('o_k').innerHTML=p.k.toFixed(3);$('o_rc').innerHTML=(p.rc/1e6).toFixed(2);
   $('o_vt').innerHTML=(p.vth*1000).toFixed(3);
+  const Pe=Math.abs(p.vth)*(p.zax/1000)/p.Dax;$('o_pe').innerHTML=Pe.toFixed(2);
   $('o_Th').innerHTML=hfd.TH.toFixed(2);$('o_T1').innerHTML=hfd.T1.toFixed(2);
   $('o_T2').innerHTML=hfd.T2.toFixed(2);$('o_T3').innerHTML=hfd.T3.toFixed(2);
   $('o_ds').innerHTML=hfd.ds.toFixed(3);$('o_da').innerHTML=hfd.da.toFixed(3);$('o_dsa').innerHTML=hfd.dsa.toFixed(3);
