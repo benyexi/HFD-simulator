@@ -249,10 +249,12 @@ function drawKD(ci){
   const c=$('kC'),cx=c.getContext('2d'),w=c.width,h=c.height;
   cx.clearRect(0,0,w,h);cx.fillStyle='#fff';cx.fillRect(0,0,w,h);
   if(!tsH.length)return;
-  let xmn=0,xmx=0,ymn=0,ymx=0;
-  for(const t of tsH){if(t.ratio>xmx)xmx=t.ratio;if(t.ratio<xmn)xmn=t.ratio;
-    for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
+  let ymn=0,ymx=0;
+  const rats=tsH.map(t=>t.ratio).sort((a,b)=>a-b);
+  let xmn=rats[Math.floor(rats.length*.02)]||0,xmx=rats[Math.ceil(rats.length*.98)-1]||0;
+  const xpad=(xmx-xmn)*.08||.05;xmn-=xpad;xmx+=xpad;
   xmn=Math.min(xmn,-.05);xmx=Math.max(xmx,.1);
+  for(const t of tsH){for(const v of[t.ds,t.da,t.dsa,t.Kda]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}}
   const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;xmx+=.02;
   const ml=60,mr=16,mt=18,mb=44,pw=w-ml-mr,ph=h-mt-mb;
   const toX=v=>ml+(v-xmn)/(xmx-xmn)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
@@ -263,13 +265,15 @@ function drawKD(ci){
   // X=0 vertical axis
   cx.strokeStyle='#bbb';cx.lineWidth=.7;
   {const x0=toX(0);if(x0>=ml&&x0<=ml+pw){cx.beginPath();cx.moveTo(x0,mt);cx.lineTo(x0,mt+ph);cx.stroke()}}
-  // scatter
+  // scatter (clip to plot area)
+  cx.save();cx.beginPath();cx.rect(ml,mt,pw,ph);cx.clip();
   const dot=(k,col,r)=>{cx.fillStyle=col;for(const t of tsH){cx.beginPath();cx.arc(toX(t.ratio),toY(t[k]),r,0,Math.PI*2);cx.fill()}};
   dot('dsa','#aaa',3.5);dot('Kda','#5a8a20',3.5);dot('da','#e91e90',3.5);dot('ds','#222',3.5);
   // current highlight
   if(ci>=0&&ci<tsH.length){const t=tsH[ci];
     for(const[k,col] of[['dsa','#aaa'],['Kda','#5a8a20'],['da','#e91e90'],['ds','#222']]){
       cx.beginPath();cx.arc(toX(t.ratio),toY(t[k]),7,0,Math.PI*2);cx.fillStyle=col;cx.fill();cx.strokeStyle='#000';cx.lineWidth=1.5;cx.stroke()}}
+  cx.restore();
   // K line
   if(Kval!==null){cx.strokeStyle='rgba(200,0,0,0.55)';cx.lineWidth=1.5;cx.setLineDash([6,4]);
     cx.beginPath();cx.moveTo(ml,toY(Kval));cx.lineTo(ml+pw,toY(Kval));cx.stroke();cx.setLineDash([]);
