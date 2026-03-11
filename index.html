@@ -60,8 +60,15 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="pr"><span class="pl">Noise</span><span class="pv" id="v_nl">0.03</span></div><input type=range id=nL min=0 max=.15 value=.03 step=.01>
 <select id=dTp><option value=sunny>Sunny</option><option value=cloudy>Cloudy (midday dip)</option><option value=drought>Drought (early shutdown)</option></select>
 <div><button class="bt" onclick="genD()">Generate</button><button class="bt g" onclick="playD()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
+<div class="pr"><span class="pl">Speed</span><span class="pv" id="v_sp">1x</span></div><input type=range id=spd min=1 max=50 value=1 step=1>
 <canvas id=dC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%"></canvas>
 <div class="nf" id="dI">Generate → Play</div>
+
+<div class="st">Upload Sap Flow Data</div>
+<input type=file id=upFile accept=".csv,.txt" style="display:none">
+<div><button class="bt" onclick="$('upFile').click()">Upload CSV</button><button class="bt g" onclick="playUp()">▶ Play</button><button class="bt s" onclick="stopD()">⏹</button></div>
+<canvas id=uC width=288 height=80 style="border:1px solid var(--brd);border-radius:4px;margin-top:4px;width:100%;display:none"></canvas>
+<div class="nf" id="uI">CSV: one v_sap (cm/h) per line, 10-min step.<br>Min 1 day (144 pts), max 100 days.</div>
 </div>
 
 <!-- CENTER -->
@@ -162,6 +169,7 @@ function getHFD(p){
 
 // ============ DIURNAL: smooth continuous curve ============
 let dData=null,dAI=null,dIdx=0,tsH=[];let Kval=null;
+let upData=null,useUpload=false;
 
 function genD(){
   const pk=+$('pkV').value,phr=+$('pkH').value,nm=+$('nM').value,nl=+$('nL').value,tp=$('dTp').value;
@@ -207,29 +215,40 @@ function drawDC(ci){
   cx.clearRect(0,0,w,h);cx.fillStyle='#0d1117';cx.fillRect(0,0,w,h);
   let mx=-Infinity,mn=Infinity;for(const d of dData){if(d.v>mx)mx=d.v;if(d.v<mn)mn=d.v}
   if(mx===mn){mx+=1;mn-=1}
-  const range=mx-mn;
-  // zero line
+  const range=mx-mn,maxH=dData[dData.length-1].h||24;
   if(mn<0&&mx>0){const y0=h-(0-mn)/range*(h-10)-5;cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=.5;cx.beginPath();cx.moveTo(0,y0);cx.lineTo(w,y0);cx.stroke()}
   cx.beginPath();cx.strokeStyle='#f59e0b';cx.lineWidth=1.5;
-  for(let i=0;i<dData.length;i++){const px=(dData[i].h/24)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
-  if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/24)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
+  const ds=Math.max(1,Math.floor(dData.length/w));
+  for(let i=0;i<dData.length;i+=ds){const px=(dData[i].h/maxH)*w,py=h-(dData[i].v-mn)/range*(h-10)-5;i?cx.lineTo(px,py):cx.moveTo(px,py)}cx.stroke();
+  if(ci>=0&&ci<dData.length){const d=dData[ci],px=(d.h/maxH)*w,py=h-(d.v-mn)/range*(h-10)-5;cx.beginPath();cx.arc(px,py,4,0,Math.PI*2);cx.fillStyle='#ef4444';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1;cx.stroke()}
   cx.fillStyle='rgba(255,255,255,.3)';cx.font='9px JetBrains Mono';
-  for(let hr=0;hr<=24;hr+=6)cx.fillText(hr+'h',(hr/24)*w+2,h-1);
+  if(maxH<=48){for(let hr=0;hr<=maxH;hr+=6)cx.fillText(hr+'h',(hr/maxH)*w+2,h-1)}
+  else{const nD=Math.ceil(maxH/24),st=Math.max(1,Math.ceil(nD/8));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),(d*24/maxH)*w+2,h-1)}
 }
 
 function playD(){
-  if(!dData||!dData.length)genD();stopD();dIdx=0;tsH=[];Kval=null;
+  if(!dData||!dData.length)genD();stopD();useUpload=false;dIdx=0;tsH=[];Kval=null;playLoop();}
+function playUp(){
+  if(!upData||!upData.length){$('uI').textContent='No data uploaded';return}
+  stopD();stopS();dData=[...upData];useUpload=true;dIdx=0;tsH=[];Kval=null;playLoop();}
+function playLoop(){
   function step(){
-    if(dIdx>=dData.length){stopD();$('dI').textContent='Done.';return}
-    const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
-    P=gP();solveSS(P,dIdx>0);const hfd=getHFD(P);
-    tsH.push({h:d.h,v:d.v,...hfd,Kda:0});computeK();
-    render(P);drawKD(dIdx);drawTS();drawDC(dIdx);
-    const hs=Math.floor(d.h).toString().padStart(2,'0')+':'+(Math.round((d.h%1)*60)).toString().padStart(2,'0');
-    $('sB').textContent=hs+' | v='+d.v.toFixed(1)+' cm/h';$('dI').textContent=hs+' · v='+d.v.toFixed(1)+' cm/h';
-    dIdx++;dAI=setTimeout(step,20);
-  }step();
-}
+    if(dIdx>=dData.length){stopD();const msg='Done ('+dData.length+' pts)';$('dI').textContent=msg;if(useUpload)$('uI').textContent=msg;return}
+    const spd=+$('spd').value,batch=Math.max(1,spd);
+    for(let b=0;b<batch&&dIdx<dData.length;b++){
+      const d=dData[dIdx];$('vs').value=Math.round(d.v);$('v_vs').textContent=Math.round(d.v)+' cm/h';
+      P=gP();solveSS(P,dIdx>0);const hfd=getHFD(P);
+      tsH.push({h:d.h,v:d.v,...hfd,Kda:0});dIdx++;}
+    computeK();render(P);drawKD(tsH.length-1);drawTS();
+    if(useUpload)drawUC(dIdx-1);else drawDC(dIdx-1);
+    const d=dData[dIdx-1],totalH=d.h,day=Math.floor(totalH/24)+1,hInDay=totalH%24;
+    const hh=Math.floor(hInDay).toString().padStart(2,'0'),mm=(Math.round((hInDay%1)*60)).toString().padStart(2,'0');
+    const prefix=dData.length>144?'D'+day+' ':'';
+    const label=prefix+hh+':'+mm+' | v='+d.v.toFixed(1)+' cm/h';
+    $('sB').textContent=label;$('dI').textContent=label;
+    if(useUpload)$('uI').textContent=label+' ('+dIdx+'/'+dData.length+')';
+    dAI=setTimeout(step,20);
+  }step();}
 function stopD(){if(dAI){clearTimeout(dAI);dAI=null}}
 
 function computeK(){
@@ -306,7 +325,8 @@ function drawTS(){
   let ymn=Infinity,ymx=-Infinity,vmx=1,vmn=0;
   for(const t of tsH){for(const v of[t.ds,t.da,t.dsa]){if(v<ymn)ymn=v;if(v>ymx)ymx=v}if(t.v>vmx)vmx=t.v;if(t.v<vmn)vmn=t.v}
   const yr=ymx-ymn||.1;ymn-=yr*.08;ymx+=yr*.08;
-  const toX=i=>ml+(tsH[i].h/24)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
+  const maxH=tsH[tsH.length-1].h||24;
+  const toX=i=>ml+(tsH[i].h/maxH)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
   if(ymn<0&&ymx>0){cx.strokeStyle='#ddd';cx.lineWidth=.5;cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke()}
   // velocity fill
   const vrange=vmx-vmn||1;
@@ -324,7 +344,8 @@ function drawTS(){
   cx.textAlign='center';cx.fillText('Time (h)',ml+pw/2,h-4);
   // tick labels
   cx.fillStyle='#666';cx.font='12px JetBrains Mono';cx.textAlign='center';
-  for(let hr=0;hr<=24;hr+=4)cx.fillText(hr+'h',ml+(hr/24)*pw,mt+ph+20);
+  if(maxH<=48){for(let hr=0;hr<=maxH;hr+=Math.max(4,Math.ceil(maxH/24)*4))cx.fillText(hr+'h',ml+(hr/maxH)*pw,mt+ph+20)}
+  else{const nD=Math.ceil(maxH/24),st=Math.max(1,Math.ceil(nD/10));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),ml+(d*24/maxH)*pw,mt+ph+20)}
   cx.textAlign='right';
   const ys=nS(yr);
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys)cx.fillText(yv.toFixed(1),ml-4,toY(yv)+4);
@@ -418,6 +439,7 @@ function updUI(){
   const phr=+$('pkH').value;$('v_ph').textContent=Math.floor(phr)+':'+(Math.round((phr%1)*60)).toString().padStart(2,'0');
   $('v_nm').textContent=(+$('nM').value).toFixed(1)+' cm/h';
   $('v_nl').textContent=(+$('nL').value).toFixed(2);
+  $('v_sp').textContent=$('spd').value+'x';
   const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.q.toFixed(2)+'W/m';
 }
 document.querySelectorAll('input[type=range],select').forEach(e=>e.addEventListener('input',updUI));
@@ -435,6 +457,42 @@ function runTr(){stopS();stopD();isR=true;P=gP();G=new Float64Array(NX*NY);G.fil
     for(let j=0;j<NY;j++){G[j]=Ta;G[(NX-1)*NY+j]=Ta}sT+=dt;}
   render(P);$('sB').textContent='t='+sT.toFixed(1)+'s';if(isR)aI=requestAnimationFrame(a)})()}
 function runSS(){stopS();stopD();P=gP();$('sB').textContent='Computing...';setTimeout(()=>{solveSS(P);render(P);$('sB').textContent='Steady state'},15)}
+
+// ============ UPLOAD SAP FLOW DATA ============
+$('upFile').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const lines=ev.target.result.trim().split(/\r?\n/);
+    let si=0;const fp=lines[0].split(/[,\t; ]+/);
+    if(isNaN(parseFloat(fp[fp.length>1?1:0])))si=1;
+    const vals=[];
+    for(let i=si;i<lines.length;i++){const ln=lines[i].trim();if(!ln)continue;
+      const ps=ln.split(/[,\t; ]+/);const v=parseFloat(ps[ps.length>1?1:0]);if(!isNaN(v))vals.push(v)}
+    if(vals.length<144){$('uI').textContent='Error: need >= 144 points (1 day)';return}
+    if(vals.length>14400)vals.length=14400;
+    upData=vals.map((v,i)=>({h:i*10/60,v}));
+    const nD=(vals.length/144).toFixed(1);
+    $('uI').textContent=file.name+': '+vals.length+' pts ('+nD+' days)';
+    $('uC').style.display='block';drawUC(-1);
+  };reader.readAsText(file);e.target.value='';
+});
+function drawUC(ci){
+  if(!upData)return;const c=$('uC'),cx=c.getContext('2d'),w=c.width,h=c.height;
+  cx.clearRect(0,0,w,h);cx.fillStyle='#0d1117';cx.fillRect(0,0,w,h);
+  let mx=-Infinity,mn=Infinity;for(const d of upData){if(d.v>mx)mx=d.v;if(d.v<mn)mn=d.v}
+  if(mx===mn){mx+=1;mn-=1}
+  const range=mx-mn,maxH=upData[upData.length-1].h||24;
+  if(mn<0&&mx>0){const y0=h-(0-mn)/range*(h-10)-5;cx.strokeStyle='rgba(255,255,255,0.15)';cx.lineWidth=.5;cx.beginPath();cx.moveTo(0,y0);cx.lineTo(w,y0);cx.stroke()}
+  const ds=Math.max(1,Math.floor(upData.length/w));
+  cx.beginPath();cx.strokeStyle='#22c55e';cx.lineWidth=1;
+  for(let i=0;i<upData.length;i+=ds){const px=(upData[i].h/maxH)*w,py=h-(upData[i].v-mn)/range*(h-10)-5;i===0?cx.moveTo(px,py):cx.lineTo(px,py)}cx.stroke();
+  if(ci>=0&&ci<upData.length){const d=upData[ci],px=(d.h/maxH)*w;cx.strokeStyle='rgba(239,68,68,0.8)';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(px,0);cx.lineTo(px,h);cx.stroke()}
+  cx.fillStyle='rgba(255,255,255,.3)';cx.font='9px JetBrains Mono';
+  const nD=Math.ceil(maxH/24);
+  if(nD<=2){for(let hr=0;hr<=maxH;hr+=6)cx.fillText(hr+'h',(hr/maxH)*w+2,h-1)}
+  else{const st=Math.max(1,Math.ceil(nD/8));for(let d=0;d<nD;d+=st)cx.fillText('D'+(d+1),(d*24/maxH)*w+2,h-1)}
+}
 
 hc.addEventListener('mousemove',e=>{
   if(!G||!P.dx)return;const r=hc.getBoundingClientRect(),sx=hc.width/r.width,sy=hc.height/r.height;
