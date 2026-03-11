@@ -37,10 +37,14 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="st">Probe Geometry</div>
 <div class="pr"><span class="pl">Z_ax</span><span class="pv" id="v_zax">15 mm</span></div><input type=range id=zax min=5 max=30 value=15 step=1>
 <div class="pr"><span class="pl">Z_tg</span><span class="pv" id="v_ztg">5 mm</span></div><input type=range id=ztg min=2 max=15 value=5 step=1>
+<div class="st">Probe Dimensions</div>
+<div class="pr"><span class="pl">Heater L (加热探针)</span><span class="pv" id="v_L">100 mm</span></div><input type=range id=hL min=20 max=120 value=100 step=5>
+<div class="pr"><span class="pl">Temp L (测温探针)</span><span class="pv" id="v_tL">100 mm</span></div><input type=range id=tL min=20 max=120 value=100 step=5>
+<div class="pr"><span class="pl">Meas. depth (测温深度)</span><span class="pv" id="v_md">50 mm</span></div><input type=range id=mD min=5 max=100 value=50 step=1>
+<div class="nf" id="probeWarn" style="display:none;color:#ef4444;border-color:rgba(239,68,68,0.3)"></div>
 <div class="st">Heating (~50mA continuous)</div>
 <div class="pr"><span class="pl">Current I</span><span class="pv" id="v_I">50 mA</span></div><input type=range id=hI min=20 max=150 value=50 step=1>
 <div class="pr"><span class="pl">Resistance R</span><span class="pv" id="v_R">120 Ω</span></div><input type=range id=hR min=40 max=300 value=120 step=5>
-<div class="pr"><span class="pl">Needle L</span><span class="pv" id="v_L">100 mm</span></div><input type=range id=hL min=20 max=120 value=100 step=5>
 <div class="nf"><code id="pwD">P=0.300W q=3.00W/m</code></div>
 <div class="st">Sapwood</div>
 <div class="pr"><span class="pl">θ_w</span><span class="pv" id="v_tw">0.40</span></div><input type=range id=tw min=.10 max=.80 value=.40 step=.01>
@@ -132,17 +136,23 @@ const $=id=>document.getElementById(id);
 
 function gP(){
   const I=+$('hI').value/1000,R=+$('hR').value,L=+$('hL').value/1000;
+  const tL=+$('tL').value/1000,mD=+$('mD').value/1000; // temp probe length, meas depth (m)
   const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
   const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
   const zax=+$('zax').value,ztg=+$('ztg').value;
   const Gb=rd/RW,u=tw*RW/rd,k=.10+.20*Gb+.60*tw,rc=rd*CDr+RW*CW*tw;
   const Db=k/rc,Dtg=Db,Dax=Db*an;
   const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
-  const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
+  const Pw=I*I*R,qnom=Pw/L,ddx=dxm/1000;
+  // End-effect correction: near heater probe ends the effective q is reduced
+  // f approaches 1 in the middle, drops near ends (characteristic length ~5mm)
+  const r0=0.005;
+  const fEnd=Math.min(1,1-Math.exp(-mD/r0)-Math.exp(-(L-mD)/r0));
+  const q=qnom*Math.max(0.1,fEnd);
   NX=Math.floor(70/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
   const Q=q/(ddx*ddx);
   const dt=Math.min(.2*ddx*ddx/Math.max(Dtg,Dax),Math.abs(vth)>1e-12?.4*ddx/Math.abs(vth):1e10,.5);
-  return{I,R,L,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,Q,dx:ddx,dt,zax,ztg,vcmh};
+  return{I,R,L,tL,mD,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,qnom,Q,dx:ddx,dt,zax,ztg,vcmh,fEnd};
 }
 function pPos(p){
   const cx=Math.floor(NX/2),cy=Math.floor(NY/2),za=Math.round(p.zax/(p.dx*1000)),zt=Math.round(p.ztg/(p.dx*1000));
@@ -431,7 +441,9 @@ function updR(p){
 function updUI(){
   $('v_zax').textContent=$('zax').value+' mm';$('v_ztg').textContent=$('ztg').value+' mm';
   $('v_I').textContent=$('hI').value+' mA';$('v_R').textContent=$('hR').value+' Ω';
-  $('v_L').textContent=$('hL').value+' mm';$('v_tw').textContent=(+$('tw').value).toFixed(2);
+  $('v_L').textContent=$('hL').value+' mm';$('v_tL').textContent=$('tL').value+' mm';
+  $('v_md').textContent=$('mD').value+' mm';
+  $('v_tw').textContent=(+$('tw').value).toFixed(2);
   $('v_rd').textContent=$('rd').value+' kg/m³';$('v_an').textContent=(+$('an').value).toFixed(1);
   $('v_vs').textContent=$('vs').value+' cm/h';$('v_ta').textContent=(+$('ta').value).toFixed(1)+' °C';
   $('v_dx').textContent=(+$('dx').value).toFixed(2)+' mm';
@@ -440,7 +452,14 @@ function updUI(){
   $('v_nm').textContent=(+$('nM').value).toFixed(1)+' cm/h';
   $('v_nl').textContent=(+$('nL').value).toFixed(2);
   $('v_sp').textContent=$('spd').value+'x';
-  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.q.toFixed(2)+'W/m';
+  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.qnom.toFixed(2)+'W/m (eff '+p.q.toFixed(2)+')';
+  // Validate measurement depth vs probe lengths
+  const md=+$('mD').value,hLen=+$('hL').value,tLen=+$('tL').value;
+  const warn=$('probeWarn');
+  if(md>hLen||md>tLen){
+    const msgs=[];if(md>hLen)msgs.push('depth > heater ('+hLen+'mm)');if(md>tLen)msgs.push('depth > temp probe ('+tLen+'mm)');
+    warn.textContent='Warning: '+msgs.join(', ');warn.style.display='block';
+  }else warn.style.display='none';
 }
 document.querySelectorAll('input[type=range],select').forEach(e=>e.addEventListener('input',updUI));
 function stopS(){if(aI)cancelAnimationFrame(aI);isR=false}
