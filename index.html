@@ -8,27 +8,27 @@
 body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden}
 .hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px}
 .hd h1{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:var(--acc)}
-.hd .sub{font-size:12px;color:var(--dim)}
+.hd .sub{font-size:14px;color:var(--dim)}
 .main{display:grid;grid-template-columns:320px 1fr 480px;height:calc(100vh - 54px)}
 .pnl{padding:14px 16px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
 .pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}
-.st{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
+.st{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
 .pr{display:flex;justify-content:space-between;align-items:center;margin:3px 0}
-.pl{font-size:12px;color:var(--dim)}.pv{font-size:12px;color:var(--txt);min-width:70px;text-align:right}
+.pl{font-size:15px;color:var(--dim)}.pv{font-size:15px;color:var(--txt);min-width:70px;text-align:right}
 input[type=range]{width:100%;height:5px;-webkit-appearance:none;background:var(--brd);border-radius:3px;outline:none;margin:2px 0 8px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--acc);border-radius:50%;cursor:pointer}
-select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);padding:5px 8px;font-size:12px;font-family:inherit;border-radius:4px;width:100%;margin:3px 0 6px}
-.bt{background:var(--acc);color:var(--bg);border:none;padding:7px 16px;font-size:12px;font-family:inherit;font-weight:600;border-radius:4px;cursor:pointer;margin:3px 2px}
+select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);padding:5px 8px;font-size:15px;font-family:inherit;border-radius:4px;width:100%;margin:3px 0 6px}
+.bt{background:var(--acc);color:var(--bg);border:none;padding:7px 16px;font-size:15px;font-family:inherit;font-weight:600;border-radius:4px;cursor:pointer;margin:3px 2px}
 .bt:hover{opacity:.85}.bt.s{background:var(--brd);color:var(--txt)}.bt.g{background:#22c55e;color:var(--bg)}
-.nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:4px;padding:6px 10px;margin:6px 0;font-size:11px;line-height:1.4;color:var(--dim)}.nf code{color:var(--acc)}
+.nf{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:4px;padding:6px 10px;margin:6px 0;font-size:14px;line-height:1.4;color:var(--dim)}.nf code{color:var(--acc)}
 .cv{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080c14;position:relative;padding:16px 0}
 .rd{background:var(--pnl);border:1px solid var(--brd);border-radius:4px;padding:5px 10px;margin:3px 0}
-.rt{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:2px}
-.rv{font-size:16px;font-weight:600;color:var(--acc)}.ru{font-size:10px;color:var(--dim);margin-left:3px}
+.rt{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:2px}
+.rv{font-size:20px;font-weight:600;color:var(--acc)}.ru{font-size:12px;color:var(--dim);margin-left:3px}
 .lb{display:flex;flex-direction:column;gap:4px;margin:5px 0;padding:8px 10px;background:var(--pnl);border:1px solid var(--brd);border-radius:4px}
-.li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--dim)}
+.li{display:flex;align-items:center;gap:7px;font-size:15px;color:var(--dim)}
 .ld{width:12px;height:12px;border-radius:50%;border:2px solid #fff;flex-shrink:0}
-.sts{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:4px 10px;border-radius:4px;font-size:11px;color:var(--dim)}
+.sts{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.85);border:1px solid var(--brd);padding:4px 10px;border-radius:4px;font-size:14px;color:var(--dim)}
 </style></head><body>
 <div class="hd"><h1>HFD Heat Field Simulator</h1><span class="sub">Nadezhdina 4-needle HFD · 2D FD solver · K-diagram · Diurnal</span></div>
 <div class="main">
@@ -67,12 +67,12 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <!-- CENTER -->
 <div class="cv" id="cvWrap">
 <div style="display:flex;align-items:flex-start;gap:8px">
-<div id="yLabel" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:12px;color:var(--dim);display:flex;align-items:center">↑ axial (stem upward, sap flow) mm</div>
+<div id="yLabel" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:14px;color:var(--dim);display:flex;align-items:center">↑ axial (stem upward, sap flow) mm</div>
 <div><canvas id=hC style="border:1px solid var(--brd)"></canvas>
-<div style="text-align:center;font-size:12px;color:var(--dim);margin-top:4px">← tangential (mm) →</div></div>
+<div style="text-align:center;font-size:14px;color:var(--dim);margin-top:4px">← tangential (mm) →</div></div>
 <div style="display:flex;align-items:stretch;gap:4px">
 <canvas id=cbar width=22 style="border:1px solid var(--brd)"></canvas>
-<div id="cbLabels" style="display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:9px">°C</span><span id=cbMn>0</span></div>
+<div id="cbLabels" style="display:flex;flex-direction:column;justify-content:space-between;font-size:13px;color:var(--dim)"><span id=cbMx>ΔT</span><span style="font-size:9px">°C</span><span id=cbMn>0</span></div>
 </div></div>
 <div class="sts" id=sB>Ready</div>
 </div>
@@ -110,9 +110,9 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <canvas id=kC width=448 height=320 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
 <div class="st">Time Series (24h)</div>
 <canvas id=tC width=448 height=160 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%"></canvas>
-<div style="display:flex;gap:12px;justify-content:center;margin:4px 0;font-size:11px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
+<div style="display:flex;gap:12px;justify-content:center;margin:4px 0;font-size:14px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
 <div class="st">Cursor</div>
-<div class="rd"><div class="rv" id="o_m" style="font-size:12px">Hover heat field</div></div>
+<div class="rd"><div class="rv" id="o_m" style="font-size:15px">Hover heat field</div></div>
 </div>
 </div>
 
@@ -346,8 +346,13 @@ function render(p){
   let md=0;for(let i=0;i<NX*NY;i++){const d=G[i]-p.Ta;if(d>md)md=d}if(md<.001)md=.001;
   const img=hctx.createImageData(w,h);
   for(let px=0;px<w;px++)for(let py=0;py<h;py++){
-    const gi=Math.min(Math.floor(px/cW),NX-1),gj=Math.min(NY-1-Math.floor(py/cH),NY-1);
-    const t=(G[gi*NY+gj]-p.Ta)/md;const[r,g,b]=jet(t);
+    // bilinear interpolation for smooth rendering
+    const gx=px/cW-0.5,gy=(NY-1)-(py/cH-0.5);
+    const gi0=Math.max(0,Math.min(Math.floor(gx),NX-2)),gj0=Math.max(0,Math.min(Math.floor(gy),NY-2));
+    const fx=Math.max(0,Math.min(gx-gi0,1)),fy=Math.max(0,Math.min(gy-gj0,1));
+    const v00=G[gi0*NY+gj0],v10=G[(gi0+1)*NY+gj0],v01=G[gi0*NY+(gj0+1)],v11=G[(gi0+1)*NY+(gj0+1)];
+    const val=(1-fx)*(1-fy)*v00+fx*(1-fy)*v10+(1-fx)*fy*v01+fx*fy*v11;
+    const t=(val-p.Ta)/md;const[r,g,b]=jet(t);
     const i4=(py*w+px)*4;img.data[i4]=r;img.data[i4+1]=g;img.data[i4+2]=b;img.data[i4+3]=255;}
   hctx.putImageData(img,0,0);
   hctx.strokeStyle='rgba(0,0,0,.12)';hctx.lineWidth=.7;
