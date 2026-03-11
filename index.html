@@ -119,7 +119,7 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 
 <script>
-const CW=4186,RW=1000,KDr=.12,KWa=.57,CDr=1200;
+const CW=4186,RW=1000,CDr=1200;
 let G,NX,NY,P={},aI=null,isR=false,sT=0;
 const $=id=>document.getElementById(id);
 
@@ -128,7 +128,7 @@ function gP(){
   const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
   const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
   const zax=+$('zax').value,ztg=+$('ztg').value;
-  const k=KDr+KWa*tw,rc=rd*CDr+RW*CW*tw;
+  const Gb=rd/RW,u=tw*RW/rd,k=Gb*(.2+.4*u)+.024,rc=rd*CDr+RW*CW*tw;
   const Db=k/rc,Dtg=Db,Dax=Db*an;
   const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
   const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
