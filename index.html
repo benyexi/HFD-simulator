@@ -9,12 +9,12 @@ body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--txt
 .hd{padding:14px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .hd h1{font-family:'Source Serif 4',serif;font-size:clamp(16px,2.5vw,22px);font-weight:700;color:var(--acc)}
 .hd .sub{font-size:clamp(11px,1.5vw,14px);color:var(--dim)}
-.main{display:grid;grid-template-columns:320px 1fr 560px;min-height:calc(100vh - 54px)}
-@media(max-width:1200px){.main{grid-template-columns:1fr 1fr;}.main>.cv{order:-1;grid-column:1/-1}}
-@media(max-width:800px){.main{grid-template-columns:1fr;}.main>.cv{order:-1}}
+.main{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,2fr) minmax(300px,1.8fr)}
+@media(max-width:1100px){.main{grid-template-columns:1fr 1fr;}.main>.cv{order:-1;grid-column:1/-1}}
+@media(max-width:700px){.main{grid-template-columns:1fr;}.main>.cv{order:-1}}
 .pnl{padding:14px 16px;overflow-y:visible;scrollbar-width:thin;scrollbar-color:var(--brd) transparent}
 .pnl{border-bottom:1px solid var(--brd)}
-@media(min-width:1201px){.pnl{border-bottom:none}.pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}}
+@media(min-width:1101px){.pnl{border-bottom:none}.pnl:first-child{border-right:1px solid var(--brd)}.pnl:last-child{border-left:1px solid var(--brd)}}
 .st{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--acc);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid rgba(245,158,11,0.15)}.st:first-child{margin-top:0}
 .pr{display:flex;justify-content:space-between;align-items:center;margin:3px 0}
 .pl{font-size:15px;color:var(--dim)}.pv{font-size:15px;color:var(--txt);min-width:70px;text-align:right}
@@ -136,9 +136,9 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 </div>
 
 <div class="st">K-Diagram (Nadezhdina 2018)</div>
-<canvas id=kC width=640 height=440 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;max-width:100%"></canvas>
+<canvas id=kC width=640 height=440 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;height:auto"></canvas>
 <div class="st">Time Series (24h)</div>
-<canvas id=tC width=640 height=300 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;max-width:100%"></canvas>
+<canvas id=tC width=640 height=300 style="border:1px solid #ccc;border-radius:4px;background:#fff;width:100%;height:auto"></canvas>
 <div style="display:flex;gap:12px;justify-content:center;margin:4px 0;font-size:14px;color:var(--dim)"><span style="color:#222">— dTsym</span><span style="color:#e91e90">— dTas</span><span style="color:#999">— dTs-a</span><span style="color:#2a2">▓ v</span></div>
 <div class="st">Cursor</div>
 <div class="rd"><div class="rv" id="o_m" style="font-size:15px">Hover heat field</div></div>
@@ -384,9 +384,9 @@ const hc=$('hC'),cbc=$('cbar');
 let hctx=hc.getContext('2d'),cbctx=cbc.getContext('2d');
 function resizeCanvas(){
   const wrap=$('cvWrap');
-  const avW=wrap.clientWidth-70; // y-label + colorbar
-  // Use available width but cap at reasonable size; allow vertical expansion
-  const sz=Math.max(200,Math.min(avW,600));
+  const avW=wrap.clientWidth-80;
+  const avH=window.innerHeight-100;
+  const sz=Math.max(180,Math.min(avW,avH,560));
   hc.width=sz;hc.height=sz;hc.style.width=sz+'px';hc.style.height=sz+'px';
   $('yLabel').style.height=sz+'px';
   const cbH=Math.round(sz*0.45);
