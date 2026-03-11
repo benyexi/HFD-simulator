@@ -59,9 +59,10 @@ select{background:var(--pnl);color:var(--txt);border:1px solid var(--brd);paddin
 <div class="pr"><span class="pl">Meas. depth (测温深度)</span><span class="pv" id="v_md">50 mm</span></div><input type=range id=mD min=5 max=100 value=50 step=1>
 <div class="nf" id="probeWarn" style="display:none;color:#ef4444;border-color:rgba(239,68,68,0.3)"></div>
 <div class="st">Heating (~50mA continuous)</div>
+<div class="pr"><span class="pl">Supply V</span><span class="pv" id="v_V">6.0 V</span></div><input type=range id=hV min=1.0 max=12.0 value=6.0 step=0.1>
 <div class="pr"><span class="pl">Current I</span><span class="pv" id="v_I">50 mA</span></div><input type=range id=hI min=20 max=150 value=50 step=1>
 <div class="pr"><span class="pl">Resistance R</span><span class="pv" id="v_R">120 Ω</span></div><input type=range id=hR min=40 max=300 value=120 step=5>
-<div class="nf"><code id="pwD">P=0.300W q=3.00W/m</code></div>
+<div class="nf"><code id="pwD">P=0.300W q=0.030W/cm</code></div>
 <div class="st">Sapwood</div>
 <div class="pr"><span class="pl">θ_w</span><span class="pv" id="v_tw">0.40</span></div><input type=range id=tw min=.10 max=.80 value=.40 step=.01>
 <div class="pr"><span class="pl">ρ_dry</span><span class="pv" id="v_rd">500 kg/m³</span></div><input type=range id=rd min=200 max=900 value=500 step=10>
@@ -151,7 +152,7 @@ let G,NX,NY,P={},aI=null,isR=false,sT=0;
 const $=id=>document.getElementById(id);
 
 function gP(){
-  const I=+$('hI').value/1000,R=+$('hR').value,L=+$('hL').value/1000;
+  const V=+$('hV').value,R=+$('hR').value,Imax=V/R,I=Math.min(+$('hI').value/1000,Imax),L=+$('hL').value/1000;
   const tL=+$('tL').value/1000,mD=+$('mD').value/1000; // temp probe length, meas depth (m)
   const tw=+$('tw').value,rd=+$('rd').value,an=+$('an').value;
   const vcmh=+$('vs').value,Ta=+$('ta').value,dxm=+$('dx').value;
@@ -168,7 +169,7 @@ function gP(){
   NX=Math.floor(70/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
   const Q=q/(ddx*ddx);
   const dt=Math.min(.2*ddx*ddx/Math.max(Dtg,Dax),Math.abs(vth)>1e-12?.4*ddx/Math.abs(vth):1e10,.5);
-  return{I,R,L,tL,mD,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,qnom,Q,dx:ddx,dt,zax,ztg,vcmh,fEnd};
+  return{V,I,R,L,tL,mD,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,qnom,Q,dx:ddx,dt,zax,ztg,vcmh,fEnd};
 }
 function pPos(p){
   const cx=Math.floor(NX/2),cy=Math.floor(NY/2),za=Math.round(p.zax/(p.dx*1000)),zt=Math.round(p.ztg/(p.dx*1000));
@@ -456,7 +457,7 @@ function updR(p){
 }
 function updUI(){
   $('v_zax').textContent=$('zax').value+' mm';$('v_ztg').textContent=$('ztg').value+' mm';
-  $('v_I').textContent=$('hI').value+' mA';$('v_R').textContent=$('hR').value+' Ω';
+  $('v_V').textContent=(+$('hV').value).toFixed(1)+' V';$('v_I').textContent=$('hI').value+' mA';$('v_R').textContent=$('hR').value+' Ω';
   $('v_L').textContent=$('hL').value+' mm';$('v_tL').textContent=$('tL').value+' mm';
   $('v_md').textContent=$('mD').value+' mm';
   $('v_tw').textContent=(+$('tw').value).toFixed(2);
@@ -468,7 +469,9 @@ function updUI(){
   $('v_nm').textContent=(+$('nM').value).toFixed(1)+' cm/h';
   $('v_nl').textContent=(+$('nL').value).toFixed(2);
   $('v_sp').textContent=$('spd').value+'x';
-  const p=gP();$('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+p.qnom.toFixed(2)+'W/m (eff '+p.q.toFixed(2)+')';
+  const p=gP();
+  const Imax=p.V/p.R;if(+$('hI').value/1000>Imax)$('v_I').textContent=(p.I*1000).toFixed(0)+' mA (V限)';
+  $('pwD').textContent='P='+p.Pw.toFixed(3)+'W q='+(p.qnom/100).toFixed(4)+'W/cm (eff '+(p.q/100).toFixed(4)+')';
   // Validate measurement depth vs probe lengths
   const md=+$('mD').value,hLen=+$('hL').value,tLen=+$('tL').value;
   const warn=$('probeWarn');
@@ -571,10 +574,11 @@ updUI();P=gP();resizeCanvas();solveSS(P);render(P);
 <tr><td>Heater L</td><td>Heater probe length</td><td>加热探针长度</td><td>mm</td></tr>
 <tr><td>Temp L</td><td>Temperature probe length</td><td>测温探针长度</td><td>mm</td></tr>
 <tr><td>Meas. depth</td><td>Measurement depth</td><td>测温点深度(距边材外表面)</td><td>mm</td></tr>
+<tr><td>V</td><td>Supply voltage</td><td>供电电压</td><td>V</td></tr>
 <tr><td>I</td><td>Heating current</td><td>加热电流</td><td>mA</td></tr>
 <tr><td>R</td><td>Heater resistance</td><td>加热丝电阻</td><td>&Omega;</td></tr>
 <tr><td>P</td><td>Heating power (I&sup2;R)</td><td>加热功率</td><td>W</td></tr>
-<tr><td>q</td><td>Linear heat flux (P/L)</td><td>线热源功率密度</td><td>W/m</td></tr>
+<tr><td>q</td><td>Linear heat flux (P/L)</td><td>线热源功率密度</td><td>W/cm</td></tr>
 <tr><td>&theta;_w</td><td>Sapwood water content</td><td>边材体积含水率</td><td>m&sup3;/m&sup3;</td></tr>
 <tr><td>&rho;_dry</td><td>Sapwood dry density</td><td>边材干密度</td><td>kg/m&sup3;</td></tr>
 <tr><td>D_ax/D_tg</td><td>Thermal anisotropy ratio</td><td>热扩散各向异性比</td><td>&mdash;</td></tr>
@@ -616,15 +620,16 @@ updUI();P=gP();resizeCanvas();solveSS(P);render(P);
 <tr><td>Z_tg</td><td>Tangential spacing — 切向间距：加热探针中心到侧向测温探针(T3)中心的切向距离，垂直于树干轴向和径向。</td></tr>
 
 <tr><td class="sec" colspan=2>Probe Dimensions / 探针尺寸</td></tr>
-<tr><td>Heater L</td><td>Heater probe length — 加热探针长度：加热丝的有效加热段总长度，径向插入树干。直接决定线热源功率密度 q = P / L (W/m)。探针越长，单位长度热量越分散。</td></tr>
+<tr><td>Heater L</td><td>Heater probe length — 加热探针长度：加热丝的有效加热段总长度，径向插入树干。直接决定线热源功率密度 q = P / L (W/cm)。探针越长，单位长度热量越分散。</td></tr>
 <tr><td>Temp L</td><td>Temperature probe length — 测温探针长度：测温针的有效总长度。测温深度(Meas. depth)不应超过此值。</td></tr>
 <tr><td>Meas. depth</td><td>Measurement depth — 测温深度：温度传感器敏感点距离边材最外表面的径向深度。此参数通过端部效应修正影响模拟：当测温点靠近加热探针两端时，有效热源强度 q 会因三维散热而降低，修正公式为 f = 1 &minus; exp(&minus;d/r₀) &minus; exp(&minus;(L&minus;d)/r₀)，r₀ &asymp; 5 mm。</td></tr>
 
 <tr><td class="sec" colspan=2>Heating / 加热参数</td></tr>
-<tr><td>I</td><td>Current — 加热电流：通过加热探针的恒定直流电流(mA)。HFD 典型值约 50–60 mA。</td></tr>
+<tr><td>V</td><td>Supply voltage — 供电电压(V)：为加热探针供电的直流电压。实际电流受 I = V/R 限制，当滑块电流超过 V/R 时自动截断并显示"V限"。典型 HFD 系统供电电压为 6V。</td></tr>
+<tr><td>I</td><td>Current — 加热电流：通过加热探针的恒定直流电流(mA)。HFD 典型值约 50–60 mA。受供电电压限制，实际电流 = min(I_slider, V/R)。</td></tr>
 <tr><td>R</td><td>Resistance — 加热丝电阻：加热探针内部电阻丝的总电阻(Ω)。</td></tr>
 <tr><td>P</td><td>Power — 加热功率(W)：P = I² &times; R。即焦耳热功率。</td></tr>
-<tr><td>q</td><td>Linear heat flux — 线热源功率密度(W/m)：q = P / L。经端部效应修正后的有效值显示为 "eff"。此值是 2D 有限差分模拟中的源项。</td></tr>
+<tr><td>q</td><td>Linear heat flux — 线热源功率密度(W/cm)：q = P / L。经端部效应修正后的有效值显示为 "eff"。此值是 2D 有限差分模拟中的源项。</td></tr>
 
 <tr><td class="sec" colspan=2>Sapwood / 边材属性</td></tr>
 <tr><td>&theta;_w</td><td>Water content — 边材体积含水率(m³水/m³边材)：活立木边材典型值 0.30–0.60。含水率越高，导热系数和热容越大。</td></tr>
