@@ -132,7 +132,7 @@ function gP(){
   const Db=k/rc,Dtg=Db,Dax=Db*an;
   const vs=vcmh/100/3600,vth=(RW*CW/rc)*vs;
   const Pw=I*I*R,q=Pw/L,ddx=dxm/1000;
-  NX=Math.floor(50/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
+  NX=Math.floor(70/dxm)|0;NY=NX;if(NX%2===0){NX++;NY++}
   const Q=q/(ddx*ddx);
   const dt=Math.min(.2*ddx*ddx/Math.max(Dtg,Dax),Math.abs(vth)>1e-12?.4*ddx/Math.abs(vth):1e10,.5);
   return{I,R,L,tw,rd,an,Ta,k,rc,Dtg,Dax,vth,Pw,q,Q,dx:ddx,dt,zax,ztg,vcmh};
@@ -257,8 +257,10 @@ function drawKD(ci){
   const toX=v=>ml+(v-xmn)/(xmx-xmn)*pw,toY=v=>mt+ph-(v-ymn)/(ymx-ymn)*ph;
   cx.strokeStyle='#eee';cx.lineWidth=.5;const ys=nS(yr);
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys){cx.beginPath();cx.moveTo(ml,toY(yv));cx.lineTo(ml+pw,toY(yv));cx.stroke()}
+  // Y=0 horizontal axis: blue dashed
+  if(ymn<0&&ymx>0){cx.strokeStyle='#3b82f6';cx.lineWidth=1;cx.setLineDash([6,4]);cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke();cx.setLineDash([])}
+  // X=0 vertical axis
   cx.strokeStyle='#bbb';cx.lineWidth=.7;
-  if(ymn<0&&ymx>0){cx.beginPath();cx.moveTo(ml,toY(0));cx.lineTo(ml+pw,toY(0));cx.stroke()}
   {const x0=toX(0);if(x0>=ml&&x0<=ml+pw){cx.beginPath();cx.moveTo(x0,mt);cx.lineTo(x0,mt+ph);cx.stroke()}}
   // scatter
   const dot=(k,col,r)=>{cx.fillStyle=col;for(const t of tsH){cx.beginPath();cx.arc(toX(t.ratio),toY(t[k]),r,0,Math.PI*2);cx.fill()}};
@@ -280,8 +282,8 @@ function drawKD(ci){
   for(let yv=Math.ceil(ymn/ys)*ys;yv<=ymx;yv+=ys)cx.fillText(yv.toFixed(1),ml-4,toY(yv)+4);
   cx.textAlign='center';const xs=nS(xmx-xmn);
   for(let xv=Math.ceil(xmn/xs)*xs;xv<=xmx;xv+=xs)cx.fillText(xv.toFixed(1),toX(xv),mt+ph+18);
-  // LEGEND - positioned at bottom-left inside axes to avoid overlapping top-right data
-  const lx=ml+8,ly=mt+ph-96,lw=150,lh=90;
+  // LEGEND - positioned at bottom-right inside axes
+  const lx=ml+pw-158,ly=mt+ph-96,lw=150,lh=90;
   cx.fillStyle='rgba(255,255,255,0.95)';cx.strokeStyle='#ccc';cx.lineWidth=.7;
   cx.fillRect(lx,ly,lw,lh);cx.strokeRect(lx,ly,lw,lh);
   const items=[['#222','dTsym'],['#e91e90','dTas'],['#aaa','dTs-a'],['#5a8a20','K+dTs-a']];
